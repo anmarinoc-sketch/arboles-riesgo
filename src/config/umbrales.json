@@ -1,0 +1,9 @@
+{
+  "_nota": "Tabla 64 (Plan Maestro Envigado, 3.7.5). El documento escribe los rangos como 30-50 y 50-60 sin precisar los bordes. 'hasta' es el limite superior; 'inclusivo' indica si ese valor pertenece a la categoria.",
+  "categorias": [
+    { "id": "bajo",       "nombre": "Bajo",       "hasta": 30,   "inclusivo": false, "color": "#2e9e4f", "accion": "Sin intervención" },
+    { "id": "medio-bajo", "nombre": "Medio-Bajo", "hasta": 50,   "inclusivo": false, "color": "#e6c200", "accion": "Sin intervención, con observación" },
+    { "id": "medio-alto", "nombre": "Medio-Alto", "hasta": 60,   "inclusivo": true,  "color": "#f08c00", "accion": "Intervención que disminuya el riesgo" },
+    { "id": "alto",       "nombre": "Alto",       "hasta": null, "inclusivo": false, "color": "#d62828", "accion": "Tala inminente" }
+  ]
+}
