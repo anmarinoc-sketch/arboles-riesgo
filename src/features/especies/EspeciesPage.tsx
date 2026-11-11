@@ -4,6 +4,7 @@ import { db, restaurarSemilla, type EspecieDB } from "../../db/db";
 import { descargar, hoy } from "../../lib/descargar";
 import { especiesACSV, leerEspeciesCSV } from "../../lib/especiesCsv";
 import UmbralesCard from "./UmbralesCard";
+import MetodoVCard from "./MetodoVCard";
 
 const OPCIONES: { label: string; valor: number; hint: string }[] = [
   { label: "1/3", valor: 1 / 3, hint: "se sabe que NO" },
@@ -69,6 +70,7 @@ export default function EspeciesPage() {
 
   return (
     <>
+      <MetodoVCard />
       <UmbralesCard />
       <section className="card">
         <h2>Catálogo de especies</h2>

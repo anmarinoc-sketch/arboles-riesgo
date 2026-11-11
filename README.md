@@ -86,7 +86,8 @@ Variables categóricas: solo 1/3, 2/3 o 1. Variables dicotómicas: 0 o 1. Mayor 
 - **Raíces:** `Ra` = 0 (buen estado) o 1 (mal estado).
 - **Amenaza:** `A = (Vo + Cr + Ra) / 3`.
 - **Vulnerabilidad:** `V = 1` si hay al menos uno entre personas, vehículos, construcciones o redes aéreas
-  (las subterráneas no cuentan); si no, `V = 0`.
+  (las subterráneas no cuentan); si no, `V = 0`. Es el método por defecto, el del numeral 3.7. Hay una variante
+  (ver «Método de vulnerabilidad»).
 - **Riesgo:** `A × V`, como proporción y como porcentaje.
 
 Pendiente y sitio de siembra se registran como datos descriptivos y **no entran en el cálculo** (numeral 3.7.5:
@@ -114,6 +115,21 @@ El documento no precisa qué pasa justo en los bordes. Quedaron así y se pueden
   `inclusivo`, color y acción. La comparación tolera ruido de coma flotante en los bordes.
 - **Variables**, en `LIMITES` de [`src/engine/riesgo.ts`](src/engine/riesgo.ts): 10 y 20 m exactos cuentan como
   2/3; una rama de exactamente 5 cm o a exactamente 5 m cuenta como 0; 30° exactos cuentan como 0.
+
+### Método de vulnerabilidad
+
+Algunos informes usan la misma metodología pero calculan la vulnerabilidad de otra forma. En **Ajustes → Cálculo de
+la vulnerabilidad (V)** se elige entre:
+
+- **Al menos un elemento (numeral 3.7, por defecto):** `V = 1` si hay al menos uno de los cuatro elementos; si no, 0.
+- **Promedio de los cuatro elementos:** `V = (P + Ve + C + Re) / 4` (0, 0,25, 0,5, 0,75 o 1). Es el que aparece en el
+  anexo de valoración del Consorcio Linar 2025.
+
+Vo, Cr, Ra y A no cambian. La app reproduce el ejemplo de ese anexo (acacia rosada: Vo 0,75, Cr 0,8333, A 0,5278,
+V 0,75, riesgo 39,6 %, que el anexo redondea a 40 %). **Ojo:** con el mismo árbol, los dos métodos pueden dar
+categorías distintas (ese árbol da 52,8 % «Medio-Alto» con el método 3.7 y 39,6 % «Medio-Bajo» con el promedio), así
+que conviene usar siempre el mismo dentro de un inventario. Cada evaluación guarda el método con el que se calculó
+(columna `metodo_vulnerabilidad` del CSV, también al importar), y cambiar el ajuste no modifica las ya guardadas.
 
 ### Uso en otros lugares
 

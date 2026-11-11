@@ -12,7 +12,7 @@ export function aPayload(e: EvaluacionDB) {
   return {
     codigo: e.codigo, creada: e.creada, actualizada: e.actualizada,
     especie: e.especie, catDiametrica: e.catDiametrica,
-    categoriaId: e.categoriaId, categoriaNombre: e.categoriaNombre,
+    categoriaId: e.categoriaId, categoriaNombre: e.categoriaNombre, modoV: e.modoV ?? "al-menos-uno",
     form: e.form, resultado: e.resultado,
   };
 }

@@ -1,15 +1,18 @@
 import {
-  CAMPOS_ENUMERADOS, CATEGORIAS_DIAMETRICAS, OPCIONES_INVENTARIO, aEntrada, calcularRiesgo, formVacio, validarForm,
+  type ModoVulnerabilidad, CAMPOS_ENUMERADOS, CATEGORIAS_DIAMETRICAS, OPCIONES_INVENTARIO, aEntrada, calcularRiesgo, formVacio, validarForm,
   type Especie, type FormEvaluacion,
 } from "../engine";
 import { COLUMNAS_ENTRADA } from "./exportar";
 import { origenNacionalAWgs84 } from "./coordenadas";
+import { esModoV, modoVActual } from "./metodo";
 import { parseCSV } from "./csv";
 import { categoriasActivas, categorizarActual } from "./categorias";
 
 export interface FilaImportada {
   fila: number; // numero de fila en el archivo (la 1 es el encabezado)
   form: FormEvaluacion;
+  /** Metodo de vulnerabilidad: el de la columna metodo_vulnerabilidad o, si falta, el vigente en Ajustes. */
+  modoV: ModoVulnerabilidad;
   errores: string[];
 }
 
@@ -22,7 +25,7 @@ export interface LecturaCSV {
 const OPCIONALES = new Set([
   "zona", "pendiente", "sitio_siembra", "observaciones", "decision_final", "justificacion", "familia", "habito", "madurez",
   "origen", "fustes", "diametro_copa_m", "fenologia", "estado_fitosanitario", "prioridad", "tomografia",
-  "tratamiento_realizado", "interferencia", "recomendacion",
+  "tratamiento_realizado", "interferencia", "recomendacion", "metodo_vulnerabilidad",
 ]);
 
 const sinTildes = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -151,10 +154,13 @@ export function leerCSV(texto: string, codigosExistentes: Set<string> = new Set(
       const ya = err.some(e => e.startsWith(NOMBRE_CAMPO[col] ?? col));
       if (!ya) err.push(`${NOMBRE_CAMPO[col] ?? col}: ${msg.toLowerCase()}`);
     }
+    const mv = valor(g("metodo_vulnerabilidad"));
+    let modoV: ModoVulnerabilidad = modoVActual();
+    if (mv) { if (esModoV(mv)) modoV = mv; else err.push(`método de vulnerabilidad: «${g("metodo_vulnerabilidad").trim()}» debe ser al-menos-uno o promedio`); }
     // La decision final solo exige justificacion si difiere del calculo (requiere el catalogo)
     if (catalogo && f.decisionFinalId && !f.justificacion) {
       const entrada = aEntrada(f, catalogo);
-      if (entrada && categorizarActual(calcularRiesgo(entrada).porcentaje).id !== f.decisionFinalId)
+      if (entrada && categorizarActual(calcularRiesgo(entrada, modoV).porcentaje).id !== f.decisionFinalId)
         err.push("justificación: obligatoria cuando la decisión final difiere del cálculo");
     }
     if (f.codigo) {
@@ -162,7 +168,7 @@ export function leerCSV(texto: string, codigosExistentes: Set<string> = new Set(
       else if (vistos.has(f.codigo)) err.push(`código ${f.codigo}: repetido en el archivo`);
       vistos.add(f.codigo);
     }
-    return { fila: i + 2, form: f, errores: err };
+    return { fila: i + 2, form: f, modoV, errores: err };
   });
   return { filas: out, columnasFaltantes: [] };
 }

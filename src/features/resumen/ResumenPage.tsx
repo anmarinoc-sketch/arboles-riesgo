@@ -33,12 +33,12 @@ export default function ResumenPage() {
       if (fila.errores.length) continue;
       const entrada = aEntrada(fila.form, catalogo);
       if (!entrada) continue;
-      const resultado = calcularRiesgo(entrada);
+      const resultado = calcularRiesgo(entrada, fila.modoV);
       const cat = categorizarActual(resultado.porcentaje);
       if (fila.form.decisionFinalId && fila.form.decisionFinalId !== cat.id && !fila.form.justificacion) continue; // se informa abajo
       nuevas.push({
         codigo: fila.form.codigo, especie: fila.form.especie, catDiametrica: fila.form.catDiametrica!,
-        categoriaId: cat.id, categoriaNombre: cat.nombre, creada: ahora, actualizada: ahora, sincronizada: 0,
+        categoriaId: cat.id, categoriaNombre: cat.nombre, modoV: fila.modoV, creada: ahora, actualizada: ahora, sincronizada: 0,
         form: fila.form, resultado,
       });
     }

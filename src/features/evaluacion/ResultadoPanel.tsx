@@ -3,6 +3,7 @@ import Aviso from "../../components/Aviso";
 import { Campo } from "../../components/controles";
 import { fmt } from "../../lib/util";
 import { useCategorias } from "../../lib/categorias";
+import { DESCRIPCION_MODO, useModoV } from "../../lib/metodo";
 
 
 interface Props {
@@ -15,6 +16,7 @@ interface Props {
 
 export default function ResultadoPanel({ resultado, categoria, form, errores, set }: Props) {
   const CATS = useCategorias();
+  const modoV = useModoV();
   if (!resultado || !categoria) {
     return (
       <section className="card">
@@ -29,7 +31,7 @@ export default function ResultadoPanel({ resultado, categoria, form, errores, se
     ["Cr · Caída de ramas", fmt(resultado.Cr)],
     ["Ra · Raíces", fmt(resultado.Ra)],
     ["A · Amenaza", fmt(resultado.A)],
-    ["V · Vulnerabilidad", String(resultado.V)],
+    ["V · Vulnerabilidad", fmt(resultado.V)],
     ["Riesgo (A × V)", fmt(resultado.riesgo)],
   ];
   const difiere = !!form.decisionFinalId && form.decisionFinalId !== categoria.id;
@@ -47,6 +49,7 @@ export default function ResultadoPanel({ resultado, categoria, form, errores, se
           <tr><td>Riesgo (%)</td><td>{fmt(resultado.porcentaje, 1)} %</td></tr>
         </tbody>
       </table>
+      <p className="muted">{DESCRIPCION_MODO[modoV].formula}. Cambia el método en Ajustes.</p>
       <Aviso />
       <Campo label="Decisión final del técnico (opcional)" error={errores.decisionFinalId}>
         <select value={form.decisionFinalId ?? ""}

@@ -181,8 +181,12 @@ export async function generarFichaPDF(e: EvaluacionDB, fotos: FotoDB[], catalogo
   y += 2;
   celdas([
     ["Vo (volcam.)", fmt(r.Vo)], ["Cr (caída ramas)", fmt(r.Cr)], ["Ra (raíces)", String(r.Ra)],
-    ["A (amenaza)", fmt(r.A)], ["V (vulnerab.)", String(r.V)], ["Riesgo = A × V", `${fmt(r.riesgo)} (${fmt(r.porcentaje, 1)} %)`],
+    ["A (amenaza)", fmt(r.A)], ["V (vulnerab.)", fmt(r.V)], ["Riesgo = A × V", `${fmt(r.riesgo)} (${fmt(r.porcentaje, 1)} %)`],
   ], 6);
+  doc.setFont("helvetica", "italic").setFontSize(8).setTextColor(100)
+    .text(e.modoV === "promedio" ? "Vulnerabilidad: V = (P + Ve + C + Re) / 4" : "Vulnerabilidad: V = 1 si hay al menos un elemento expuesto; si no, 0", M, y + 4);
+  doc.setTextColor(0);
+  y += 5;
 
   // Fotografias adicionales
   if (fotos.length > 1) {

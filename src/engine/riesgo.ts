@@ -1,4 +1,4 @@
-import type { EntradaRiesgo, ResultadoRiesgo, Dico } from "./types";
+import type { EntradaRiesgo, ResultadoRiesgo, Dico, ModoVulnerabilidad } from "./types";
 
 /** Limites de las variables (numeral 3.7.3). El documento no define los bordes
  *  exactos (p. ej. rama de 5 cm justos); se fijan aqui en un unico lugar. */
@@ -18,7 +18,7 @@ export function tamanoArbol(alturaM: number): number {
   return 1;
 }
 
-export function calcularRiesgo(e: EntradaRiesgo): ResultadoRiesgo {
+export function calcularRiesgo(e: EntradaRiesgo, modo: ModoVulnerabilidad = "al-menos-uno"): ResultadoRiesgo {
   const v = e.volcamiento, c = e.caidaRamas;
   const Vo = (tamanoArbol(v.alturaArbolM) + v.spVolcamiento + b(v.estadoGeneralMalo) +
     b(v.inclinacionGrados > LIMITES.inclinacionGrados)) / 4;
@@ -27,7 +27,8 @@ export function calcularRiesgo(e: EntradaRiesgo): ResultadoRiesgo {
   const Ra = b(e.raicesMalEstado);
   const A = (Vo + Cr + Ra) / 3;
   const vu = e.vulnerabilidad;
-  const V = b(vu.personas || vu.vehiculos || vu.construcciones || vu.redesAereas);
+  const presentes = b(vu.personas) + b(vu.vehiculos) + b(vu.construcciones) + b(vu.redesAereas);
+  const V = modo === "promedio" ? presentes / 4 : presentes > 0 ? 1 : 0;
   const riesgo = A * V;
   return { Vo, Cr, Ra, A, V, riesgo, porcentaje: riesgo * 100 };
 }

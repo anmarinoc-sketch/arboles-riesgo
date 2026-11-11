@@ -1,6 +1,6 @@
 import Dexie, { type Table } from "dexie";
 import seed from "../config/especies.seed.json";
-import type { Especie, FormEvaluacion, ResultadoRiesgo } from "../engine";
+import type { Especie, FormEvaluacion, ModoVulnerabilidad, ResultadoRiesgo } from "../engine";
 
 export interface EspecieDB extends Especie {
   id?: number;
@@ -19,6 +19,8 @@ export interface EvaluacionDB {
   form: FormEvaluacion;
   resultado: ResultadoRiesgo;
   categoriaNombre: string;
+  /** Metodo con el que se calculo V; si falta (evaluaciones antiguas) es "al-menos-uno". */
+  modoV?: ModoVulnerabilidad;
 }
 
 export interface FotoDB {

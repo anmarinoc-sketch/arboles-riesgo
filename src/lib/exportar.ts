@@ -11,7 +11,7 @@ export const COLUMNAS_ENTRADA = [
   "pendiente", "sitio_siembra", "observaciones",
   "familia", "habito", "madurez", "origen", "fustes", "diametro_copa_m", "fenologia", "estado_fitosanitario",
   "prioridad", "tomografia", "tratamiento_realizado", "interferencia", "recomendacion",
-  "decision_final", "justificacion",
+  "decision_final", "justificacion", "metodo_vulnerabilidad",
 ] as const;
 
 /** Coordenadas planas MAGNA Origen Nacional (EPSG:9377). Salida; la importacion las acepta si faltan lat y lon. */
@@ -45,6 +45,7 @@ export function valoresEvaluacion(e: EvaluacionDB): Record<string, string | numb
     tratamiento_realizado: f.tratamientoRealizado ?? "", interferencia: f.interferencia ?? "",
     recomendacion: seguro(f.recomendacion),
     decision_final: dec?.nombre ?? "", justificacion: seguro(f.justificacion),
+    metodo_vulnerabilidad: e.modoV ?? "al-menos-uno",
     vo: round(r.Vo), cr: round(r.Cr), ra: r.Ra, amenaza: round(r.A), vulnerabilidad: r.V,
     riesgo: round(r.riesgo), riesgo_pct: Number(r.porcentaje.toFixed(1)), categoria: e.categoriaNombre,
     accion: cat?.accion ?? "",

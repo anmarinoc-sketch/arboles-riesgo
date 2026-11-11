@@ -85,3 +85,9 @@ button:disabled { opacity: .5; }
 input[type=color] { padding: 2px; min-height: 48px; }
 .seg { flex-wrap: wrap; }
 .seg button { flex: 1 1 auto; min-width: 5.5rem; }
+
+.opcion-modo { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin: 8px 0; cursor: pointer; }
+.opcion-modo.on { border-color: var(--brand); box-shadow: 0 0 0 1px var(--brand) inset; }
+.opcion-modo input { width: 24px; min-height: 24px; margin-top: 2px; flex: none; }
+.opcion-modo span { display: flex; flex-direction: column; gap: 4px; }
+.opcion-modo code { font-size: .85rem; background: var(--bg); padding: 4px 6px; border-radius: 6px; }

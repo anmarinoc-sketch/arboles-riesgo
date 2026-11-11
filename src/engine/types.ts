@@ -3,6 +3,14 @@ export type Cat3 = number;
 export const CAT3_VALORES = [1 / 3, 2 / 3, 1] as const;
 export type Dico = 0 | 1;
 
+/**
+ * Como se obtiene la vulnerabilidad V a partir de los cuatro elementos expuestos (P, Ve, C, Re):
+ * - "al-menos-uno": V = 1 si hay al menos uno, si no 0 (numeral 3.7 del Plan Maestro de Envigado).
+ * - "promedio": V = (P + Ve + C + Re) / 4 (variante usada en otros informes, p. ej. el anexo del Consorcio Linar 2025).
+ */
+export type ModoVulnerabilidad = "al-menos-uno" | "promedio";
+export const MODOS_VULNERABILIDAD: ModoVulnerabilidad[] = ["al-menos-uno", "promedio"];
+
 export interface Volcamiento {
   alturaArbolM: number;       // T: <10 => 1/3; 10-20 => 2/3; >20 => 1
   spVolcamiento: Cat3;        // Sp
@@ -32,7 +40,7 @@ export interface EntradaRiesgo {
 }
 
 export interface ResultadoRiesgo {
-  Vo: number; Cr: number; Ra: number; A: number; V: Dico;
+  Vo: number; Cr: number; Ra: number; A: number; V: number;
   riesgo: number;     // proporcion 0-1
   porcentaje: number; // 0-100
 }

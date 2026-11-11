@@ -52,7 +52,7 @@ export default function ListaPage({ filtros, onFiltros }: { filtros: Filtros; on
             <p className="muted">
               {e.form.zona ? `${e.form.zona} · ` : ""}{e.form.fecha} · {e.form.evaluador} · {e.form.lat?.toFixed(5)}, {e.form.lon?.toFixed(5)}
             </p>
-            <p className="muted">Vo {fmt(e.resultado.Vo, 3)} · Cr {fmt(e.resultado.Cr, 3)} · Ra {e.resultado.Ra} · A {fmt(e.resultado.A, 3)} · V {e.resultado.V}</p>
+            <p className="muted">Vo {fmt(e.resultado.Vo, 3)} · Cr {fmt(e.resultado.Cr, 3)} · Ra {e.resultado.Ra} · A {fmt(e.resultado.A, 3)} · V {fmt(e.resultado.V, 2)}{e.modoV === "promedio" ? " (promedio)" : ""}</p>
             {dec && (
               <p className="decision"><b>Decisión del técnico: {dec.nombre}</b> — {e.form.justificacion}</p>
             )}

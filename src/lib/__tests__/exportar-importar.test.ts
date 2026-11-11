@@ -124,6 +124,18 @@ describe("importación", () => {
     const vacia = [...mala]; vacia[c("x_origen_nacional")] = ""; vacia[c("y_origen_nacional")] = "";
     expect(leerCSV(aCSV([cab, vacia])).filas[0].errores.join("|")).toMatch(/latitud/);
   });
+  it("el método de vulnerabilidad viaja en el CSV; si falta, se usa el vigente; uno inválido se reporta", () => {
+    const r = registro(form());
+    const [cab, fila] = parseCSV(evaluacionesACSV([{ ...r, modoV: "promedio" }]));
+    const c = cab.indexOf("metodo_vulnerabilidad");
+    expect(fila[c]).toBe("promedio");
+    expect(leerCSV(aCSV([cab, fila])).filas[0].modoV).toBe("promedio");
+    expect(parseCSV(evaluacionesACSV([r]))[1][c]).toBe("al-menos-uno"); // registros antiguos
+    const sinCol = cab.map((_, i) => i).filter(i => i !== c);
+    expect(leerCSV(aCSV([sinCol.map(i => cab[i]), sinCol.map(i => fila[i])])).filas[0].errores).toEqual([]);
+    const mala = [...fila]; mala[c] = "mediana";
+    expect(leerCSV(aCSV([cab, mala])).filas[0].errores.join("|")).toMatch(/método de vulnerabilidad/);
+  });
   it("la plantilla es válida", () => {
     expect(leerCSV(plantillaCSV()).filas[0].errores).toEqual([]);
   });

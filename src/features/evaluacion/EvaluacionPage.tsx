@@ -9,6 +9,7 @@ import { Campo, NumInput, SI_NO, Segmentado } from "../../components/controles";
 import { comprimirFoto, fracc } from "../../lib/util";
 import { wgs84AOrigenNacional } from "../../lib/coordenadas";
 import { categorizarActual, useCategorias } from "../../lib/categorias";
+import { useModoV } from "../../lib/metodo";
 import ResultadoPanel from "./ResultadoPanel";
 import SelectorPunto from "../mapa/SelectorPunto";
 import { fmt } from "../../lib/util";
@@ -43,7 +44,8 @@ export default function EvaluacionPage() {
   const set = (c: Partial<FormEvaluacion>) => setForm(f => ({ ...f, ...c }));
 
   const entrada = useMemo(() => aEntrada(form, catalogo), [form, catalogo]);
-  const resultado = useMemo(() => (entrada ? calcularRiesgo(entrada) : null), [entrada]);
+  const modoV = useModoV();
+  const resultado = useMemo(() => (entrada ? calcularRiesgo(entrada, modoV) : null), [entrada, modoV]);
   const categorias = useCategorias(); // vuelve a calcular si cambian los umbrales
   const categoria = useMemo(() => (resultado ? categorizarActual(resultado.porcentaje) : null), [resultado, categorias]);
   const errores = useMemo(() => validarForm(form, categoria?.id), [form, categoria]);
@@ -106,7 +108,7 @@ export default function EvaluacionPage() {
     await db.transaction("rw", db.evaluaciones, db.fotos, async () => {
       const id = await db.evaluaciones.add({
         codigo, especie: form.especie.trim(), catDiametrica: form.catDiametrica!, categoriaId: categoria.id,
-        categoriaNombre: categoria.nombre, creada: ahora, actualizada: ahora, sincronizada: 0,
+        categoriaNombre: categoria.nombre, modoV, creada: ahora, actualizada: ahora, sincronizada: 0,
         form: { ...form, codigo, especie: form.especie.trim() }, resultado,
       });
       for (const f of fotos) await db.fotos.add({ evaluacionId: id, nombre: f.nombre, blob: f.blob });
