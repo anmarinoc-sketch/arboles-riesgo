@@ -17,6 +17,10 @@ import { PASOS, pasosConError, primerPasoConError } from "./pasos";
 import { IconoAtras, IconoCheck } from "../../components/Iconos";
 import SelectorPunto from "../mapa/SelectorPunto";
 import { fmt } from "../../lib/util";
+import { AyudaAltura, AyudaDap, AyudaDiametroRama, AyudaDistancia, AyudaInclinacion } from "./ayudas/Ayudas";
+import { EstadoIlustrado, SenalesIlustradas } from "../../components/OpcionesIlustradas";
+import { IlustracionRaices, IlustracionSenal } from "../../components/Ilustraciones";
+import { CRITERIOS_RAICES, CRITERIOS_RAMA, QUE_BUSCAR } from "./guiaVisual";
 
 const ETIQUETAS = {
   habito: "Hábito", madurez: "Madurez", origen: "Origen", fustes: "Fustes", fenologia: "Fenología",
@@ -242,13 +246,16 @@ export default function EvaluacionPage({ activa = true }: { activa?: boolean } =
         <h2>Árbol</h2>
         <NumInput label="DAP" unidad="cm" value={form.dap} onChange={dap => set({ dap })} error={ver("dap")}
           hint="A 1,30 m. En pendiente o inclinado, desde el lado más cercano al suelo; con bambas o heridas, en el punto óptimo de medición" />
+        <AyudaDap onUsar={dap => set({ dap })} />
         <Segmentado label="Categoría diamétrica" value={form.catDiametrica} error={ver("catDiametrica")}
           options={CATEGORIAS_DIAMETRICAS.map(c => ({ value: c, label: c }))} onChange={catDiametrica => set({ catDiametrica })} />
         <NumInput label="Altura total" unidad="m" value={form.alturaArbolM} onChange={alturaArbolM => set({ alturaArbolM })}
           error={ver("alturaArbolM")} hint="Menos de 10 m = 1/3 · 10 a 20 m = 2/3 · más de 20 m = 1" />
+        <AyudaAltura tipo="arbol" onUsar={alturaArbolM => set({ alturaArbolM })} />
         <NumInput label="Distancia del fuste a la construcción más cercana" unidad="m" value={form.distanciaConstruccionM}
           onChange={distanciaConstruccionM => set({ distanciaConstruccionM })} error={ver("distanciaConstruccionM")}
           hint="Opcional. No entra en el cálculo, pero sirve para decidir «Construcciones cercanas»." />
+        <AyudaDistancia alturaArbolM={form.alturaArbolM} onUsar={distanciaConstruccionM => set({ distanciaConstruccionM })} />
         {enAlcance && form.construcciones !== true && (
           <p className="alerta">La construcción está más cerca que la altura del árbol: queda dentro de su alcance de caída. Revisa «Construcciones cercanas».</p>
         )}
@@ -279,15 +286,8 @@ export default function EvaluacionPage({ activa = true }: { activa?: boolean } =
         <Segmentado label="Tomografía realizada" value={form.tomografia} options={SI_NO} onClear={() => set({ tomografia: null })}
           onChange={tomografia => set({ tomografia })} />
         <Campo label="Señales de alerta observadas" hint="Toca las que veas. Ayudan a decidir el estado general y a redactar el diagnóstico.">
-          <div className="chips">
-            {SENALES_ALERTA.map(s => {
-              const on = form.senales.includes(s);
-              return (
-                <button type="button" key={s} className={"chip-sel" + (on ? " on" : "")} aria-pressed={on}
-                  onClick={() => setForm(f => ({ ...f, senales: f.senales.includes(s) ? f.senales.filter(x => x !== s) : [...f.senales, s] }))}>{s}</button>
-              );
-            })}
-          </div>
+          <SenalesIlustradas senales={SENALES_ALERTA} activas={form.senales} info={QUE_BUSCAR} dibujo={s => <IlustracionSenal senal={s} />}
+            onToggle={s => setForm(f => ({ ...f, senales: f.senales.includes(s) ? f.senales.filter(x => x !== s) : [...f.senales, s] }))} />
         </Campo>
         {senalesDano.length > 0 && form.estadoGeneral === "bueno" && (
           <p className="alerta">Marcaste señales de daño ({senalesDano.join("; ").toLowerCase()}) pero el estado general del árbol está en «Bueno». Revísalo: afecta el cálculo.</p>
@@ -312,6 +312,7 @@ export default function EvaluacionPage({ activa = true }: { activa?: boolean } =
           hint="Daño mecánico, estado fitosanitario, plagas" onChange={estadoGeneral => set({ estadoGeneral })} />
         <NumInput label="Inclinación respecto a la vertical" unidad="°" value={form.inclinacionGrados}
           onChange={inclinacionGrados => set({ inclinacionGrados })} error={ver("inclinacionGrados")} hint="Hasta 30° = 0 · más de 30° = 1" />
+        <AyudaInclinacion onUsar={inclinacionGrados => set({ inclinacionGrados })} />
       </section>
 
       <section className="card" hidden={paso !== 3}>
@@ -320,16 +321,19 @@ export default function EvaluacionPage({ activa = true }: { activa?: boolean } =
         {form.habito === "Palma" && <p className="muted">En palmas, califica la hoja (fronda) más crítica: su diámetro, estado y altura equivalen a los de la rama.</p>}
         <NumInput label="Diámetro de la rama" unidad="cm" value={form.ramaDiametroCm}
           onChange={ramaDiametroCm => set({ ramaDiametroCm })} error={ver("ramaDiametroCm")} hint="Menos de 5 cm = 0 · más de 5 cm = 1" />
-        <Segmentado label="Estado de la rama" value={form.ramaEstado} options={ESTADO} error={ver("ramaEstado")}
+        <AyudaDiametroRama onUsar={ramaDiametroCm => set({ ramaDiametroCm })} />
+        <EstadoIlustrado label="Estado de la rama" value={form.ramaEstado} error={ver("ramaEstado")} criterios={CRITERIOS_RAMA}
+          dibujo={v => <IlustracionSenal senal={v === "bueno" ? "Hojas descoloridas" : "Ramas o frondas secas, quebradas o muertas"} />}
           onChange={ramaEstado => set({ ramaEstado })} />
         <NumInput label="Altura de la rama" unidad="m" value={form.ramaAlturaM} onChange={ramaAlturaM => set({ ramaAlturaM })}
           error={ver("ramaAlturaM")} hint="Menos de 5 m = 0 · más de 5 m = 1" />
+        <AyudaAltura tipo="rama" onUsar={ramaAlturaM => set({ ramaAlturaM })} />
       </section>
 
       <section className="card" hidden={paso !== 3}>
         <h2>Amenaza · Raíces (Ra)</h2>
-        <Segmentado label="Estado de las raíces" value={form.raices} options={ESTADO} error={ver("raices")}
-          onChange={raices => set({ raices })} />
+        <EstadoIlustrado label="Estado de las raíces" value={form.raices} error={ver("raices")} criterios={CRITERIOS_RAICES}
+          dibujo={v => <IlustracionRaices estado={v} />} onChange={raices => set({ raices })} />
       </section>
 
       <section className="card" hidden={paso !== 3}>

@@ -75,7 +75,7 @@ se abre con el engranaje de arriba.
 | **Lista** | Evaluaciones guardadas, con filtros por categoría de riesgo, especie y categoría diamétrica. Ficha PDF y eliminar. |
 | **Mapa** | Puntos coloreados por categoría (mismos filtros). |
 | **Resumen** | Árboles por tamaño y nivel de riesgo, eucaliptos frente a las demás especies, inventario por especie, exportación (CSV, GeoJSON), importación desde CSV y sincronización opcional. |
-| **Aprender y guía** | Cómo se calcula el riesgo, cómo medir en campo, señales de alerta, y alcance y límites. Los valores salen de las mismas constantes del cálculo. |
+| **Aprender y guía** (con dibujos de las señales de alerta y de las raíces) | Cómo se calcula el riesgo, cómo medir en campo, señales de alerta, y alcance y límites. Los valores salen de las mismas constantes del cálculo. |
 | **Ajustes** | Método de vulnerabilidad, umbrales de las categorías y catálogo editable de especies con sus factores Sp. |
 
 No se puede guardar una evaluación si falta alguna variable obligatoria: el formulario marca los campos
@@ -319,3 +319,17 @@ src/
 - La ubicación se guarda en WGS84. Las coordenadas planas son solo para Colombia (MAGNA Origen Nacional); otros sistemas planos no están soportados.
 - Verificado en el navegador de escritorio, incluido el arranque sin servidor con el service worker. Falta
   probar en un celular real el GPS, la cámara y la instalación.
+
+## Ayudas para medir bien (paso «Riesgo» y «Árbol»)
+
+Debajo de cada medida hay un botón **¿Cómo medirlo?** con pasos, un dibujo y una calculadora que escribe el valor en el campo:
+
+| Medida | Ayuda |
+|---|---|
+| DAP | Vuelta del fuste a 1,30 m → diámetro (÷ π) |
+| Altura del árbol y de la rama | Cámara del celular con mira: se fija el ángulo a la copa y al pie, desde una distancia conocida (`altura = distancia × (tan arriba − tan abajo)`, no necesita la altura del ojo). Alternativas manuales: compararse con una persona, la sombra, pisos |
+| Distancia a la construcción | Pasos × largo de paso (se guarda en el dispositivo) y comparación con la altura del árbol |
+| Inclinación | Sensor del celular de canto contra el fuste, o plomada (separación en cm a 1 m de altura → ángulo) |
+| Diámetro de la rama | Vuelta alrededor de la rama → diámetro, y referencias de objetos (tarjeta bancaria 5,4 cm, lata 6,6 cm) |
+
+Las señales de alerta, el estado de las raíces y el de la rama se eligen con **tarjetas ilustradas** y la descripción de qué buscar. Son esquemas, no fotografías. El sensor y la cámara solo funcionan en un celular, con permiso; sin ellos quedan los métodos manuales. Las funciones de cálculo están en `src/lib/medicion.ts` con pruebas.

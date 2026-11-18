@@ -176,3 +176,46 @@ main.sin-margen { margin: 0 -16px; }
 
 .casilla { display: flex; gap: 10px; align-items: flex-start; margin: 10px 0; cursor: pointer; }
 .casilla input { width: 24px; min-height: 24px; margin-top: 2px; flex: none; }
+
+/* Ayudas de medicion */
+.ayuda { margin: 4px 0 12px; border: 1px dashed var(--brand); border-radius: 12px; background: var(--card, transparent); }
+.ayuda > summary { cursor: pointer; padding: 12px 14px; min-height: 44px; font-weight: 600; color: var(--brand); list-style: none; }
+.ayuda > summary::-webkit-details-marker { display: none; }
+.ayuda-cuerpo { padding: 0 14px 14px; }
+.ayuda-cuerpo ol, .ayuda-cuerpo ul { padding-left: 1.2rem; margin: 8px 0; }
+.ayuda-cuerpo li { margin: 6px 0; }
+.ayuda-bloque { border-top: 1px solid var(--border, #ccc); margin-top: 12px; padding-top: 10px; }
+.ayuda-campo { display: flex; flex-direction: column; gap: 4px; margin: 8px 0; font-size: .9rem; }
+.ayuda-fila { display: flex; gap: 8px; margin: 8px 0; }
+.ayuda-fila button { flex: 1; }
+.ayuda-resultado { display: flex; flex-direction: column; gap: 8px; margin: 10px 0; padding: 12px; border-radius: 10px; background: rgba(46,125,50,.12); }
+.ayuda-lectura { font-size: 2.6rem; font-weight: 700; text-align: center; margin: 8px 0; }
+.ayuda-sub { margin-top: 10px; }
+.ayuda-sub > summary { cursor: pointer; font-weight: 600; min-height: 40px; }
+.ilus { width: 100%; max-width: 260px; height: auto; border-radius: 10px; display: block; margin: 6px auto; }
+.visor { position: relative; border-radius: 12px; overflow: hidden; background: #111; aspect-ratio: 3 / 4; max-height: 56vh; margin: 8px auto; }
+.visor-video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mira { position: absolute; inset: 0; pointer-events: none; }
+.mira::before, .mira::after { content: ""; position: absolute; background: rgba(255,255,255,.9); }
+.mira::before { left: 50%; top: 40%; bottom: 40%; width: 2px; margin-left: -1px; }
+.mira::after { top: 50%; left: 40%; right: 40%; height: 2px; margin-top: -1px; }
+.mira span { position: absolute; left: 50%; top: 50%; width: 14px; height: 14px; margin: -7px 0 0 -7px; border: 2px solid #ff5252; border-radius: 50%; }
+.visor-dato { position: absolute; left: 8px; bottom: 8px; padding: 6px 10px; border-radius: 8px; background: rgba(0,0,0,.65); color: #fff; }
+/* Estado ilustrado y senales */
+.op-ilus { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.op-tarjeta { display: flex; flex-direction: column; align-items: stretch; gap: 6px; padding: 10px; text-align: left; border-width: 2px; height: auto; min-height: 0; }
+.op-tarjeta b { font-size: 1rem; }
+.op-tarjeta ul { margin: 0; padding-left: 1.1rem; font-size: .82rem; font-weight: 400; }
+.op-tarjeta.bueno.on { border-color: #2e7d32; background: rgba(46,125,50,.18); }
+.op-tarjeta.malo.on { border-color: #c62828; background: rgba(198,40,40,.16); }
+.senales-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.senal-tarjeta { border: 2px solid var(--border, #ccc); border-radius: 12px; overflow: hidden; }
+.senal-tarjeta.on { border-color: var(--brand); background: rgba(46,125,50,.14); }
+.senal-boton { width: 100%; display: flex; flex-direction: column; gap: 4px; padding: 6px; border: 0; background: transparent; min-height: 0; height: auto; }
+.senal-nombre { font-size: .85rem; font-weight: 600; text-align: center; }
+.senal-detalle { padding: 0 8px 8px; font-size: .82rem; }
+.senal-detalle summary { cursor: pointer; color: var(--brand); min-height: 32px; display: flex; align-items: center; }
+.senal-detalle p { margin: 4px 0 0; }
+@media (max-width: 340px) { .op-ilus, .senales-grid { grid-template-columns: 1fr; } }
+.op-tarjeta .ilus { max-width: 200px; }
+@media (max-width: 420px) { .op-ilus { grid-template-columns: 1fr; } }

@@ -2,6 +2,8 @@ import type { ReactNode } from "react";
 import { LIMITES, SENALES_ALERTA } from "../../engine";
 import { describirRangos, useCategorias } from "../../lib/categorias";
 import { DESCRIPCION_MODO } from "../../lib/metodo";
+import { IlustracionRaices, IlustracionSenal } from "../../components/Ilustraciones";
+import { CRITERIOS_RAICES, QUE_BUSCAR } from "../evaluacion/guiaVisual";
 
 function Tema({ titulo, abierto, children }: { titulo: string; abierto?: boolean; children: ReactNode }) {
   return (
@@ -87,7 +89,28 @@ export default function AprenderPage() {
 
       <Tema titulo="Señales de alerta">
         <p>Marca las que veas en la tarjeta de inventario. Ayudan a decidir el estado general y a redactar el diagnóstico:</p>
-        <ul>{SENALES_ALERTA.map(s => <li key={s}>{s}</li>)}</ul>
+        <div className="senales-grid">
+          {SENALES_ALERTA.map(s => (
+            <div key={s} className="senal-tarjeta">
+              <IlustracionSenal senal={s} />
+              <p className="senal-nombre">{QUE_BUSCAR[s].corto}</p>
+              <p className="senal-detalle">{QUE_BUSCAR[s].buscar}</p>
+            </div>
+          ))}
+        </div>
+      </Tema>
+
+      <Tema titulo="Estado de las raíces">
+        <p>Los dibujos son esquemas para reconocer el patrón; en campo, apóyate también en lo que ves y en el suelo alrededor.</p>
+        <div className="senales-grid">
+          {(["bueno", "malo"] as const).map(v => (
+            <div key={v} className="senal-tarjeta">
+              <IlustracionRaices estado={v} />
+              <p className="senal-nombre">{v === "bueno" ? "Buen estado" : "Mal estado"}</p>
+              <ul className="senal-detalle">{CRITERIOS_RAICES[v].map(c => <li key={c}>{c}</li>)}</ul>
+            </div>
+          ))}
+        </div>
       </Tema>
 
       <Tema titulo="Alcance y límites">
