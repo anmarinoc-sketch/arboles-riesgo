@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, restaurarSemilla, type EspecieDB } from "../../db/db";
+import { CATEGORIAS_AMENAZA, esAmenazada, type CategoriaAmenaza } from "../../engine";
 import { descargar, hoy } from "../../lib/descargar";
 import { especiesACSV, leerEspeciesCSV } from "../../lib/especiesCsv";
 import UmbralesCard from "./UmbralesCard";
@@ -99,6 +100,13 @@ export default function EspeciesPage() {
           <p className="muted">{e.comun || "—"}</p>
           <Cat3Select label="Sp · Volcamiento" value={e.spVolcamiento} onChange={v => actualizar(e, { spVolcamiento: v })} />
           <Cat3Select label="Sp · Caída de ramas" value={e.spCaidaRamas} onChange={v => actualizar(e, { spCaidaRamas: v })} />
+          <label className="campo"><span className="etq">Categoría de amenaza (opcional)</span>
+            <select value={e.categoriaAmenaza ?? ""} onChange={ev => actualizar(e, { categoriaAmenaza: (ev.target.value || undefined) as CategoriaAmenaza | undefined })}>
+              <option value="">Sin dato</option>
+              {CATEGORIAS_AMENAZA.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+            </select>
+            {esAmenazada(e.categoriaAmenaza) && <small className="error">Especie amenazada: la tala o el trasplante requieren permiso.</small>}
+          </label>
           <button className="peligro" onClick={() => confirm(`¿Eliminar ${e.cientifico}?`) && db.especies.delete(e.id!)}>
             Eliminar
           </button>
@@ -110,7 +118,7 @@ export default function EspeciesPage() {
         <p className="muted">
           La lista inicial viene de las Tablas 67 y 68 del Plan Maestro de Envigado y su calibración (eucalipto = 1, las
           demás 1/3) es de allí. En otro lugar, ajusta los factores con lo que se sepa de las especies locales, o carga tu
-          propio catálogo desde un CSV (columnas: cientifico, comun, sp_volcamiento, sp_caida_ramas).
+          propio catálogo desde un CSV (columnas: cientifico, comun, sp_volcamiento, sp_caida_ramas y, opcional, categoria_amenaza con CR, EN, VU, NT, LC o DD).
         </p>
         <button className="secundario" disabled={!especies?.length}
           onClick={() => descargar(especiesACSV(especies ?? []), `catalogo-especies-${hoy()}.csv`, "text/csv;charset=utf-8")}>

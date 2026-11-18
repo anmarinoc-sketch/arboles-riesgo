@@ -1,5 +1,5 @@
 import type { EvaluacionDB, FotoDB } from "../db/db";
-import type { Especie } from "../engine";
+import { buscarEspecie, nombreAmenaza, type Especie } from "../engine";
 import { AVISO_PROBABILISTICO } from "../components/Aviso";
 import { catPorId } from "./filtros";
 import { fmt } from "./util";
@@ -48,7 +48,8 @@ export async function generarFichaPDF(e: EvaluacionDB, fotos: FotoDB[], catalogo
   const f = e.form, r = e.resultado;
   const cat = catPorId(e.categoriaId);
   const dec = f.decisionFinalId && f.decisionFinalId !== e.categoriaId ? catPorId(f.decisionFinalId) : null;
-  const comun = catalogo.find(s => s.cientifico.trim().toLowerCase() === f.especie.trim().toLowerCase())?.comun ?? "";
+  const especieCat = buscarEspecie(f.especie, catalogo);
+  const comun = especieCat?.comun ?? "";
 
   const salto = (h: number) => { if (y + h > 284) { doc.addPage(); y = M; } };
 
@@ -101,6 +102,8 @@ export async function generarFichaPDF(e: EvaluacionDB, fotos: FotoDB[], catalogo
   celdas([["ID árbol", f.codigo], ["Fecha de visita", f.fecha]], 2, M, colIzq);
   celdas([["Zona / municipio / proyecto", f.zona]], 1, M, colIzq);
   celdas([["Evaluador", f.evaluador]], 1, M, colIzq);
+  if (f.solicitud) celdas([["Solicitud o expediente", f.solicitud]], 1, M, colIzq);
+  if (f.predio) celdas([["Predio", f.predio]], 1, M, colIzq);
   const yIzqFin = y;
   y = yTop;
   barra("FOTOGRAFÍA", xDer, colDer);
@@ -114,6 +117,7 @@ export async function generarFichaPDF(e: EvaluacionDB, fotos: FotoDB[], catalogo
   barra("IDENTIFICACIÓN BOTÁNICA DEL INDIVIDUO");
   y += 6;
   celdas([["Familia", f.familia], ["Nombre científico", f.especie], ["Nombre común", comun]], 3);
+  if (especieCat?.categoriaAmenaza) celdas([["Categoría de amenaza de la especie", nombreAmenaza(especieCat.categoriaAmenaza)]], 1);
   y += 3;
 
   salto(30);
@@ -127,8 +131,17 @@ export async function generarFichaPDF(e: EvaluacionDB, fotos: FotoDB[], catalogo
     ["Prioridad de intervención", f.prioridad ?? ""], ["Tomografía", sn(f.tomografia)],
     ["Tratamiento realizado", f.tratamientoRealizado ?? ""], ["Interferencia (redes o mobiliario)", f.interferencia ?? ""],
     ["Pendiente", f.pendiente], ["Sitio de siembra", f.sitioSiembra],
+    ["Distancia a la construcción", num(f.distanciaConstruccionM, "m")], ["Altitud", num(f.altitudM, "msnm")],
   ], 4);
   y += 3;
+
+  if (f.senales.length) {
+    salto(20);
+    barra("SEÑALES DE ALERTA OBSERVADAS");
+    y += 6;
+    texto(f.senales.join("; "));
+    y += 3;
+  }
 
   salto(20);
   barra("DIAGNÓSTICO");
@@ -187,6 +200,17 @@ export async function generarFichaPDF(e: EvaluacionDB, fotos: FotoDB[], catalogo
     .text(e.modoV === "promedio" ? "Vulnerabilidad: V = (P + Ve + C + Re) / 4" : "Vulnerabilidad: V = 1 si hay al menos un elemento expuesto; si no, 0", M, y + 4);
   doc.setTextColor(0);
   y += 5;
+
+  // Alcance de la evaluacion
+  const alcance = f.tomografia === true
+    ? "Alcance: inspección visual con tomografía. El modelo de riesgo es probabilístico y no evalúa obras de soporte del terreno (terrazas, muros)."
+    : "Alcance: inspección visual externa. No incluye análisis del sistema radicular interno ni del estado estructural de terrazas, muros u otras obras donde esté plantado el individuo, que requieren un profesional competente.";
+  const lineasAlcance = doc.setFont("helvetica", "italic").setFontSize(8).setTextColor(100).splitTextToSize(alcance, ANCHO);
+  salto(lineasAlcance.length * 3.6 + 4);
+  y += 2;
+  doc.text(lineasAlcance, M, y + 3);
+  doc.setTextColor(0);
+  y += lineasAlcance.length * 3.6 + 2;
 
   // Fotografias adicionales
   if (fotos.length > 1) {

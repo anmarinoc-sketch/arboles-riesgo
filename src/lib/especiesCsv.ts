@@ -1,13 +1,13 @@
-import type { Especie } from "../engine";
+import { CATEGORIAS_AMENAZA, type Especie } from "../engine";
 import { aCSV, parseCSV } from "./csv";
 import { fracc } from "./util";
 
-export const COLUMNAS_ESPECIES = ["cientifico", "comun", "sp_volcamiento", "sp_caida_ramas"] as const;
+export const COLUMNAS_ESPECIES = ["cientifico", "comun", "sp_volcamiento", "sp_caida_ramas", "categoria_amenaza"] as const;
 
 export function especiesACSV(especies: Especie[]): string {
   return aCSV([
     [...COLUMNAS_ESPECIES],
-    ...especies.map(e => [e.cientifico, e.comun, fracc(e.spVolcamiento), fracc(e.spCaidaRamas)]),
+    ...especies.map(e => [e.cientifico, e.comun, fracc(e.spVolcamiento), fracc(e.spCaidaRamas), e.categoriaAmenaza ?? ""]),
   ]);
 }
 
@@ -53,7 +53,13 @@ export function leerEspeciesCSV(texto: string): LecturaEspecies {
     const k2 = cientifico.toLowerCase();
     if (vistos.has(k2)) return void errores.push({ fila, mensaje: `${cientifico}: repetida en el archivo` });
     vistos.add(k2);
-    validas.push({ cientifico, comun: i("comun") >= 0 ? (r[i("comun")] ?? "").trim() : "", spVolcamiento: v, spCaidaRamas: c });
+    const am = (i("categoria_amenaza") >= 0 ? (r[i("categoria_amenaza")] ?? "") : "").trim().toUpperCase();
+    if (am && !CATEGORIAS_AMENAZA.some(x => x.id === am))
+      return void errores.push({ fila, mensaje: `${cientifico}: categoria_amenaza debe ser ${CATEGORIAS_AMENAZA.map(x => x.id).join(", ")} o estar vacía` });
+    validas.push({
+      cientifico, comun: i("comun") >= 0 ? (r[i("comun")] ?? "").trim() : "", spVolcamiento: v, spCaidaRamas: c,
+      ...(am ? { categoriaAmenaza: am as (typeof CATEGORIAS_AMENAZA)[number]["id"] } : {}),
+    });
   });
   return { validas, errores, columnasFaltantes: [] };
 }

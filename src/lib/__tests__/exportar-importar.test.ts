@@ -136,6 +136,26 @@ describe("importación", () => {
     const mala = [...fila]; mala[c] = "mediana";
     expect(leerCSV(aCSV([cab, mala])).filas[0].errores.join("|")).toMatch(/método de vulnerabilidad/);
   });
+  it("contexto de la visita, distancia, altitud y señales de alerta viajan en el CSV", () => {
+    const f = form({
+      solicitud: "CE-16641-2026", predio: "FMI 020-25523", altitudM: 2504, distanciaConstruccionM: 2.6,
+      senales: ["Raíces levantadas, cortadas o expuestas", "Hongos"], pendiente: "32,2°",
+    });
+    const l = leerCSV(evaluacionesACSV([registro(f)]));
+    expect(l.filas[0].errores).toEqual([]);
+    expect(l.filas[0].form).toEqual(f);
+    const [cab, fila] = parseCSV(evaluacionesACSV([registro(f)]));
+    expect(fila[cab.indexOf("senales")]).toBe("Raíces levantadas, cortadas o expuestas | Hongos");
+  });
+  it("una señal desconocida o una distancia negativa se reportan; las señales toleran tildes y mayúsculas", () => {
+    const [cab, fila] = parseCSV(evaluacionesACSV([registro(form())]));
+    const c = (n: string) => cab.indexOf(n);
+    const f2 = [...fila]; f2[c("senales")] = "hongos | raices levantadas, cortadas o expuestas | olor raro"; f2[c("distancia_construccion_m")] = "-1";
+    const l = leerCSV(aCSV([cab, f2])).filas[0];
+    expect(l.form.senales).toEqual(["Hongos", "Raíces levantadas, cortadas o expuestas"]);
+    expect(l.errores.join("|")).toMatch(/«olor raro» no es una señal conocida/);
+    expect(l.errores.join("|")).toMatch(/distancia a la construcción/);
+  });
   it("la plantilla es válida", () => {
     expect(leerCSV(plantillaCSV()).filas[0].errores).toEqual([]);
   });

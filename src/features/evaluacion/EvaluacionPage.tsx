@@ -2,14 +2,16 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db } from "../../db/db";
 import {
-  CATEGORIAS_DIAMETRICAS, OPCIONES_INVENTARIO, aEntrada, calcularRiesgo, formVacio, resolverSp, validarForm,
+  CATEGORIAS_DIAMETRICAS, OPCIONES_INVENTARIO, RECOMENDACIONES_RAPIDAS, SENALES_ALERTA, SENALES_DANO, SITIOS_SIEMBRA, aEntrada, calcularRiesgo, formVacio, resolverSp, validarForm,
   type FormEvaluacion,
 } from "../../engine";
 import { Campo, NumInput, SI_NO, Segmentado } from "../../components/controles";
 import { comprimirFoto, fracc } from "../../lib/util";
 import { wgs84AOrigenNacional } from "../../lib/coordenadas";
+import { agregarRecomendacion, construccionEnAlcance, pendienteEquivalente, quitarRecomendacion } from "../../lib/sitio";
 import { categorizarActual, useCategorias } from "../../lib/categorias";
 import { useModoV } from "../../lib/metodo";
+import { buscarEspecie, esAmenazada, nombreAmenaza } from "../../engine";
 import ResultadoPanel from "./ResultadoPanel";
 import SelectorPunto from "../mapa/SelectorPunto";
 import { fmt } from "../../lib/util";
@@ -29,7 +31,12 @@ const leerZona = () => { try { return localStorage.getItem(KEY_ZONA) ?? ""; } ca
 const guardarZona = (v: string) => { try { localStorage.setItem(KEY_ZONA, v); } catch { /* sin almacenamiento */ } };
 
 // Evaluador y zona se recuerdan entre árboles: lo normal es evaluar varios seguidos en el mismo sitio
-const nuevoForm = (): FormEvaluacion => ({ ...formVacio(), evaluador: leerEvaluador(), zona: leerZona() });
+const leerTxt = (k: string) => { try { return localStorage.getItem(k) ?? ""; } catch { return ""; } };
+const guardarTxt = (k: string, v: string) => { try { localStorage.setItem(k, v); } catch { /* sin almacenamiento */ } };
+const nuevoForm = (): FormEvaluacion => ({
+  ...formVacio(), evaluador: leerEvaluador(), zona: leerZona(),
+  solicitud: leerTxt("arboles.solicitud"), predio: leerTxt("arboles.predio"),
+});
 
 export default function EvaluacionPage() {
   const catalogo = useLiveQuery(() => db.especies.toArray(), []) ?? [];
@@ -52,6 +59,10 @@ export default function EvaluacionPage() {
   const ver = (k: keyof FormEvaluacion) => (intentado ? errores[k] : undefined);
   const sp = resolverSp(form.especie, catalogo);
   const plano = wgs84AOrigenNacional(form.lat, form.lon); // solo dentro de Colombia
+  const amenaza = buscarEspecie(form.especie, catalogo)?.categoriaAmenaza;
+  const enAlcance = construccionEnAlcance(form.distanciaConstruccionM, form.alturaArbolM);
+  const senalesDano = form.senales.filter(s => SENALES_DANO.includes(s));
+  const equivPendiente = pendienteEquivalente(form.pendiente);
   // Familia y origen se repiten por especie: se ofrecen los de la ultima evaluacion de la misma especie
   const [sugerencia, setSugerencia] = useState<{ familia: string; origen: FormEvaluacion["origen"] } | null>(null);
   useEffect(() => {
@@ -73,7 +84,10 @@ export default function EvaluacionPage() {
     setGps("Buscando señal GPS…");
     navigator.geolocation.getCurrentPosition(
       p => {
-        set({ lat: Number(p.coords.latitude.toFixed(6)), lon: Number(p.coords.longitude.toFixed(6)) });
+        set({
+          lat: Number(p.coords.latitude.toFixed(6)), lon: Number(p.coords.longitude.toFixed(6)),
+          ...(p.coords.altitude !== null && Number.isFinite(p.coords.altitude) ? { altitudM: Math.round(p.coords.altitude) } : {}),
+        });
         setGps(`Precisión ±${Math.round(p.coords.accuracy)} m`);
       },
       e => setGps(e.code === 1 ? "Permiso de ubicación denegado." : "No se pudo obtener la ubicación."),
@@ -115,9 +129,11 @@ export default function EvaluacionPage() {
     });
     guardarEvaluador(form.evaluador.trim());
     guardarZona(form.zona.trim());
+    guardarTxt("arboles.solicitud", form.solicitud.trim());
+    guardarTxt("arboles.predio", form.predio.trim());
     fotos.forEach(f => URL.revokeObjectURL(f.url));
     setFotos([]);
-    setForm({ ...nuevoForm(), evaluador: form.evaluador.trim(), zona: form.zona.trim() });
+    setForm({ ...nuevoForm(), evaluador: form.evaluador.trim(), zona: form.zona.trim(), solicitud: form.solicitud.trim(), predio: form.predio.trim() });
     setIntentado(false);
     setGps("");
     setMensaje({ tipo: "ok", texto: `Evaluación ${codigo} guardada (${categoria.nombre}, ${fmt(resultado.porcentaje, 1)} %).` });
@@ -151,11 +167,23 @@ export default function EvaluacionPage() {
             {catalogo.map(e => <option key={e.id} value={e.cientifico}>{e.comun}</option>)}
           </datalist>
         </Campo>
+        {esAmenazada(amenaza) && (
+          <p className="alerta" role="alert">
+            Especie amenazada: {nombreAmenaza(amenaza)}. La tala, el trasplante o el aprovechamiento requieren permiso de la
+            autoridad ambiental y suelen exigir compensación. Verifica la categoría con el listado vigente.
+          </p>
+        )}
         <Campo label="Evaluador" error={ver("evaluador")}>
           <input value={form.evaluador} onChange={e => set({ evaluador: e.target.value })} />
         </Campo>
         <Campo label="Zona o proyecto (opcional)" hint="Municipio, barrio, parque o proyecto. No entra en el cálculo.">
           <input value={form.zona} onChange={e => set({ zona: e.target.value })} />
+        </Campo>
+        <Campo label="Solicitud o expediente (opcional)" hint="Número de la solicitud, trámite o queja que origina la visita.">
+          <input value={form.solicitud} onChange={e => set({ solicitud: e.target.value })} />
+        </Campo>
+        <Campo label="Predio (opcional)" hint="Nombre, matrícula inmobiliaria o NPN.">
+          <input value={form.predio} onChange={e => set({ predio: e.target.value })} />
         </Campo>
         <Campo label="Fecha" error={ver("fecha")}>
           <input type="date" value={form.fecha} onChange={e => set({ fecha: e.target.value })} />
@@ -175,6 +203,8 @@ export default function EvaluacionPage() {
         )}
         <NumInput label="Latitud" value={form.lat} onChange={lat => set({ lat })} error={ver("lat")} hint="Grados decimales, WGS84" />
         <NumInput label="Longitud" value={form.lon} onChange={lon => set({ lon })} error={ver("lon")} />
+        <NumInput label="Altitud" unidad="msnm" value={form.altitudM} onChange={altitudM => set({ altitudM })}
+          hint="La toma el GPS si el dispositivo la entrega; es aproximada." />
         {plano && <p className="muted">MAGNA Origen Nacional: X {plano.x.toFixed(2).replace(".", ",")} · Y {plano.y.toFixed(2).replace(".", ",")}</p>}
       </section>
 
@@ -186,6 +216,12 @@ export default function EvaluacionPage() {
           options={CATEGORIAS_DIAMETRICAS.map(c => ({ value: c, label: c }))} onChange={catDiametrica => set({ catDiametrica })} />
         <NumInput label="Altura total" unidad="m" value={form.alturaArbolM} onChange={alturaArbolM => set({ alturaArbolM })}
           error={ver("alturaArbolM")} hint="Menos de 10 m = 1/3 · 10 a 20 m = 2/3 · más de 20 m = 1" />
+        <NumInput label="Distancia del fuste a la construcción más cercana" unidad="m" value={form.distanciaConstruccionM}
+          onChange={distanciaConstruccionM => set({ distanciaConstruccionM })} error={ver("distanciaConstruccionM")}
+          hint="Opcional. No entra en el cálculo, pero sirve para decidir «Construcciones cercanas»." />
+        {enAlcance && form.construcciones !== true && (
+          <p className="alerta">La construcción está más cerca que la altura del árbol: queda dentro de su alcance de caída. Revisa «Construcciones cercanas».</p>
+        )}
       </section>
 
       <section className="card">
@@ -212,8 +248,31 @@ export default function EvaluacionPage() {
         ))}
         <Segmentado label="Tomografía realizada" value={form.tomografia} options={SI_NO} onClear={() => set({ tomografia: null })}
           onChange={tomografia => set({ tomografia })} />
-        <Campo label="Tratamiento o intervención recomendada">
-          <textarea rows={2} value={form.recomendacion} onChange={e => set({ recomendacion: e.target.value })} />
+        <Campo label="Señales de alerta observadas" hint="Toca las que veas. Ayudan a decidir el estado general y a redactar el diagnóstico.">
+          <div className="chips">
+            {SENALES_ALERTA.map(s => {
+              const on = form.senales.includes(s);
+              return (
+                <button type="button" key={s} className={"chip-sel" + (on ? " on" : "")} aria-pressed={on}
+                  onClick={() => setForm(f => ({ ...f, senales: f.senales.includes(s) ? f.senales.filter(x => x !== s) : [...f.senales, s] }))}>{s}</button>
+              );
+            })}
+          </div>
+        </Campo>
+        {senalesDano.length > 0 && form.estadoGeneral === "bueno" && (
+          <p className="alerta">Marcaste señales de daño ({senalesDano.join("; ").toLowerCase()}) pero el estado general del árbol está en «Bueno». Revísalo: afecta el cálculo.</p>
+        )}
+        <Campo label="Tratamiento o intervención recomendada" hint="Toca para agregar o quitar, o escribe.">
+          <div className="chips">
+            {RECOMENDACIONES_RAPIDAS.map(r => {
+              const on = form.recomendacion.toLowerCase().includes(r.toLowerCase());
+              return (
+                <button type="button" key={r} className={"chip-sel" + (on ? " on" : "")} aria-pressed={on}
+                  onClick={() => setForm(f => ({ ...f, recomendacion: f.recomendacion.toLowerCase().includes(r.toLowerCase()) ? quitarRecomendacion(f.recomendacion, r) : agregarRecomendacion(f.recomendacion, r) }))}>{r}</button>
+              );
+            })}
+          </div>
+          <textarea rows={3} value={form.recomendacion} onChange={e => set({ recomendacion: e.target.value })} />
         </Campo>
       </section>
 
@@ -228,6 +287,7 @@ export default function EvaluacionPage() {
       <section className="card">
         <h2>Amenaza · Caída de ramas (Cr)</h2>
         <p className="muted">Califica la rama más crítica del árbol.</p>
+        {form.habito === "Palma" && <p className="muted">En palmas, califica la hoja (fronda) más crítica: su diámetro, estado y altura equivalen a los de la rama.</p>}
         <NumInput label="Diámetro de la rama" unidad="cm" value={form.ramaDiametroCm}
           onChange={ramaDiametroCm => set({ ramaDiametroCm })} error={ver("ramaDiametroCm")} hint="Menos de 5 cm = 0 · más de 5 cm = 1" />
         <Segmentado label="Estado de la rama" value={form.ramaEstado} options={ESTADO} error={ver("ramaEstado")}
@@ -255,8 +315,13 @@ export default function EvaluacionPage() {
       <section className="card">
         <h2>Datos descriptivos (opcional)</h2>
         <p className="muted">No entran en el cálculo: según el numeral 3.7.5 no fueron estadísticamente significativos.</p>
-        <Campo label="Pendiente"><input value={form.pendiente} onChange={e => set({ pendiente: e.target.value })} placeholder="p. ej. 15 % o plano" /></Campo>
-        <Campo label="Sitio de siembra"><input value={form.sitioSiembra} onChange={e => set({ sitioSiembra: e.target.value })} placeholder="p. ej. andén, separador, talud" /></Campo>
+        <Campo label="Pendiente" hint={equivPendiente ?? "Escribe con unidad (32° o 62,8 %) y verás la equivalencia."}>
+          <input value={form.pendiente} onChange={e => set({ pendiente: e.target.value })} placeholder="p. ej. 32° o 62,8 % o plano" />
+        </Campo>
+        <Campo label="Sitio de siembra" hint="Elige una sugerencia o escribe. Si está sobre terrazas, muros o rellenos, anótalo: el estado de esa estructura no lo evalúa este modelo.">
+          <input list="lista-sitios" value={form.sitioSiembra} onChange={e => set({ sitioSiembra: e.target.value })} />
+          <datalist id="lista-sitios">{SITIOS_SIEMBRA.map(s => <option key={s} value={s} />)}</datalist>
+        </Campo>
         <Campo label="Diagnóstico u observaciones" hint="Daño mecánico, inclinación, raíces expuestas, ramas quebradas, plagas…">
           <textarea rows={3} value={form.observaciones} onChange={e => set({ observaciones: e.target.value })} />
         </Campo>

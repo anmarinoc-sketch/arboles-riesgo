@@ -1,5 +1,5 @@
 import {
-  type ModoVulnerabilidad, CAMPOS_ENUMERADOS, CATEGORIAS_DIAMETRICAS, OPCIONES_INVENTARIO, aEntrada, calcularRiesgo, formVacio, validarForm,
+  SENALES_ALERTA, type ModoVulnerabilidad, CAMPOS_ENUMERADOS, CATEGORIAS_DIAMETRICAS, OPCIONES_INVENTARIO, aEntrada, calcularRiesgo, formVacio, validarForm,
   type Especie, type FormEvaluacion,
 } from "../engine";
 import { COLUMNAS_ENTRADA } from "./exportar";
@@ -25,7 +25,8 @@ export interface LecturaCSV {
 const OPCIONALES = new Set([
   "zona", "pendiente", "sitio_siembra", "observaciones", "decision_final", "justificacion", "familia", "habito", "madurez",
   "origen", "fustes", "diametro_copa_m", "fenologia", "estado_fitosanitario", "prioridad", "tomografia",
-  "tratamiento_realizado", "interferencia", "recomendacion", "metodo_vulnerabilidad",
+  "tratamiento_realizado", "interferencia", "recomendacion", "metodo_vulnerabilidad", "solicitud", "predio", "altitud_m",
+  "distancia_construccion_m", "senales",
 ]);
 
 const sinTildes = (s: string) => s.normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -39,7 +40,7 @@ const NOMBRE_CAMPO: Record<string, string> = {
   rama_estado: "estado de la rama", rama_altura_m: "altura de la rama", raices: "raíces",
   redes_aereas: "redes aéreas", x_origen_nacional: "coordenada X", y_origen_nacional: "coordenada Y", diametro_copa_m: "diámetro de copa", tomografia: "tomografía",
   estado_fitosanitario: "estado fitosanitario", tratamiento_realizado: "tratamiento realizado",
-  habito: "hábito",
+  habito: "hábito", altitud_m: "altitud", distancia_construccion_m: "distancia a la construcción",
 };
 
 /** Columna del CSV de cada campo enumerado del inventario. */
@@ -55,7 +56,7 @@ const FORM_A_COLUMNA: Record<string, string> = {
   inclinacionGrados: "inclinacion_grados", ramaDiametroCm: "rama_diametro_cm", ramaEstado: "rama_estado",
   ramaAlturaM: "rama_altura_m", raices: "raices", personas: "personas", vehiculos: "vehiculos",
   construcciones: "construcciones", redesAereas: "redes_aereas", justificacion: "justificacion",
-  diametroCopaM: "diametro_copa_m",
+  diametroCopaM: "diametro_copa_m", distanciaConstruccionM: "distancia_construccion_m",
 };
 
 function num(s: string, err: string[], col: string): number | null {
@@ -127,6 +128,15 @@ export function leerCSV(texto: string, codigosExistentes: Set<string> = new Set(
     f.construcciones = sino(g("construcciones"), err, "construcciones");
     f.redesAereas = sino(g("redes_aereas"), err, "redes_aereas");
     f.familia = desescapar(g("familia")).trim();
+    f.solicitud = desescapar(g("solicitud")).trim();
+    f.predio = desescapar(g("predio")).trim();
+    f.altitudM = num(g("altitud_m"), err, "altitud_m");
+    f.distanciaConstruccionM = num(g("distancia_construccion_m"), err, "distancia_construccion_m");
+    for (const crudo of g("senales").split("|").map(x => x.trim()).filter(Boolean)) {
+      const conocida = SENALES_ALERTA.find(s => valor(s) === valor(crudo));
+      if (!conocida) err.push(`señales: «${crudo}» no es una señal conocida`);
+      else if (!f.senales.includes(conocida)) f.senales.push(conocida);
+    }
     f.diametroCopaM = num(g("diametro_copa_m"), err, "diametro_copa_m");
     f.tomografia = sino(g("tomografia"), err, "tomografia");
     f.recomendacion = desescapar(g("recomendacion")).trim();

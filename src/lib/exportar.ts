@@ -11,6 +11,7 @@ export const COLUMNAS_ENTRADA = [
   "pendiente", "sitio_siembra", "observaciones",
   "familia", "habito", "madurez", "origen", "fustes", "diametro_copa_m", "fenologia", "estado_fitosanitario",
   "prioridad", "tomografia", "tratamiento_realizado", "interferencia", "recomendacion",
+  "solicitud", "predio", "altitud_m", "distancia_construccion_m", "senales",
   "decision_final", "justificacion", "metodo_vulnerabilidad",
 ] as const;
 
@@ -44,6 +45,8 @@ export function valoresEvaluacion(e: EvaluacionDB): Record<string, string | numb
     estado_fitosanitario: f.estadoFitosanitario ?? "", prioridad: f.prioridad ?? "", tomografia: sn(f.tomografia),
     tratamiento_realizado: f.tratamientoRealizado ?? "", interferencia: f.interferencia ?? "",
     recomendacion: seguro(f.recomendacion),
+    solicitud: seguro(f.solicitud), predio: seguro(f.predio), altitud_m: f.altitudM ?? "",
+    distancia_construccion_m: f.distanciaConstruccionM ?? "", senales: f.senales.join(" | "),
     decision_final: dec?.nombre ?? "", justificacion: seguro(f.justificacion),
     metodo_vulnerabilidad: e.modoV ?? "al-menos-uno",
     vo: round(r.Vo), cr: round(r.Cr), ra: r.Ra, amenaza: round(r.A), vulnerabilidad: r.V,

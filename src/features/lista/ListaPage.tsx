@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { buscarEspecie, esAmenazada, nombreAmenaza } from "../../engine";
 import { db, type EvaluacionDB } from "../../db/db";
 import { descargar } from "../../lib/descargar";
 import FiltrosBar from "../../components/FiltrosBar";
@@ -9,6 +11,7 @@ import { useCategorias } from "../../lib/categorias";
 
 export default function ListaPage({ filtros, onFiltros }: { filtros: Filtros; onFiltros: (f: Filtros) => void }) {
   useCategorias();
+  const catalogo = useLiveQuery(() => db.especies.toArray(), []) ?? [];
   const { cargando, total, lista, especies } = useEvaluaciones(filtros);
 
   const [generando, setGenerando] = useState<number | null>(null);
@@ -56,6 +59,10 @@ export default function ListaPage({ filtros, onFiltros }: { filtros: Filtros; on
             {dec && (
               <p className="decision"><b>Decisión del técnico: {dec.nombre}</b> — {e.form.justificacion}</p>
             )}
+            {esAmenazada(buscarEspecie(e.especie, catalogo)?.categoriaAmenaza) && (
+              <p className="alerta">Especie amenazada: {nombreAmenaza(buscarEspecie(e.especie, catalogo)?.categoriaAmenaza)}. Su tala o trasplante requieren permiso.</p>
+            )}
+            {e.form.senales.length > 0 && <p className="muted">Señales: {e.form.senales.join("; ")}</p>}
             {e.form.observaciones && <p className="muted">{e.form.observaciones}</p>}
             <button className="secundario" disabled={generando === e.id} onClick={() => ficha(e)}>
               {generando === e.id ? "Generando…" : "Descargar ficha PDF"}

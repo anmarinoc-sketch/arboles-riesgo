@@ -91,3 +91,8 @@ input[type=color] { padding: 2px; min-height: 48px; }
 .opcion-modo input { width: 24px; min-height: 24px; margin-top: 2px; flex: none; }
 .opcion-modo span { display: flex; flex-direction: column; gap: 4px; }
 .opcion-modo code { font-size: .85rem; background: var(--bg); padding: 4px 6px; border-radius: 6px; }
+
+.chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 8px; }
+.chip-sel { min-height: 44px; padding: 6px 12px; border-radius: 999px; font-size: .9rem; text-align: left; }
+.chip-sel.on { background: var(--brand); border-color: var(--brand); color: #fff; }
+.alerta { background: var(--warn-bg); color: var(--warn-ink); border-radius: 12px; padding: 10px 12px; margin: 8px 0; font-size: .92rem; }

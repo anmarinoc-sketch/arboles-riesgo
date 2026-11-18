@@ -178,6 +178,35 @@ operativa y fotografía, identificación botánica, medidas dasométricas y esta
 intervención, coordenadas) y agrega la evaluación del riesgo. El **Resumen** suma un inventario por especie, con
 origen, nativas frente a introducidas, y conteos por prioridad y estado.
 
+## Visitas técnicas de campo
+
+Pensado también para informes de visita sobre árboles o palmas puntuales (p. ej. una solicitud de concepto técnico).
+Todo esto es opcional y **no entra en el cálculo del riesgo**:
+
+- **Contexto:** solicitud o expediente, predio (nombre, matrícula o NPN) y zona. Se recuerdan entre árboles. La
+  altitud (msnm) la toma el GPS si el dispositivo la entrega.
+- **Distancia del fuste a la construcción más cercana:** si es menor que la altura del árbol, la construcción está
+  dentro de su alcance de caída y la app avisa si «Construcciones cercanas» está en «No».
+- **Señales de alerta observadas:** inclinación pronunciada, grietas en la base, raíces levantadas o expuestas, cuello
+  tapado, hongos, cavidades o pudrición, ramas o frondas secas, hojas faltantes, corteza pelada, manchas
+  hinchadas, hojas descoloridas, líquenes o epífitas, podas inadecuadas, amarres sobre el fuste. Si marcas señales de
+  daño y dejas el estado general en «Bueno», la app te lo señala.
+- **Recomendaciones rápidas:** botones para agregar o quitar intervenciones frecuentes (poda de mantenimiento, poda de
+  control cerca de la construcción, retiro de hojas secas, malla de protección, trasplante, tala…) al texto
+  «tratamiento recomendado».
+- **Pendiente con equivalencia:** al escribir «32,2°» o «62,8 %» la app muestra el valor en la otra unidad (% = tan(°) × 100).
+  Sitio de siembra con sugerencias, incluida «terraza o estructura artificial».
+- **Palmas:** con hábito «Palma», la sección de caída de ramas recuerda calificar la hoja (fronda) más crítica.
+- **Especies amenazadas:** cada especie del catálogo admite una categoría de amenaza (CR, EN, VU, NT, LC, DD). Si es
+  CR, EN o VU, el formulario, la lista y el inventario avisan que la tala o el trasplante requieren permiso de la
+  autoridad ambiental. La lista inicial trae *Ceroxylon quindiuense* (EN), *Syagrus sancona* (VU) y *Handroanthus
+  chrysanthus* (VU) según informes de referencia (Resolución 0126 de 2024 del MADS y GBIF): **verifícalas con el
+  listado vigente de tu país**. Los catálogos que ya existían reciben las especies nuevas y la amenaza sin que se
+  modifiquen los factores Sp que hayas editado.
+- **Ficha PDF:** suma solicitud, predio, categoría de amenaza, distancia, altitud, señales y una nota de **alcance**
+  (inspección visual externa; no evalúa el sistema radicular interno ni el estado estructural de terrazas o muros donde
+  esté plantado el individuo).
+
 ## Datos, exportación e importación
 
 - Todo se guarda en IndexedDB del navegador del dispositivo. **Borrar los datos del sitio borra las
@@ -198,7 +227,8 @@ origen, nativas frente a introducidas, y conteos por prioridad y estado.
 Columnas de entrada: `codigo, especie, evaluador, fecha, zona, lat, lon, dap, cat_diametrica, altura_m,
 estado_general, inclinacion_grados, rama_diametro_cm, rama_estado, rama_altura_m, raices, personas, vehiculos,
 construcciones, redes_aereas, pendiente, sitio_siembra, observaciones, familia, habito, madurez, origen, fustes, diametro_copa_m, fenologia,
-estado_fitosanitario, prioridad, tomografia, tratamiento_realizado, interferencia, recomendacion, decision_final,
+estado_fitosanitario, prioridad, tomografia, tratamiento_realizado, interferencia, recomendacion, solicitud, predio,
+altitud_m, distancia_construccion_m, senales (separadas por « | »), decision_final,
 justificacion`. Las de inventario (de `familia` a `recomendacion`) pueden faltar.
 
 ## Sincronización (opcional)

@@ -21,6 +21,56 @@ export const OPCIONES_INVENTARIO = {
   tratamientoRealizado: ["Ninguno", "Drench", "Endoterapia", "Drench y endoterapia"],
   interferencia: ["Ninguna", "Redes", "Mobiliario", "Redes y mobiliario"],
 } as const;
+/**
+ * Señales de alerta que se pueden marcar en campo (informes tecnicos de visita y fichas de inventario). Ayudan a
+ * decidir el estado general y a redactar el diagnostico; no entran al calculo.
+ */
+export const SENALES_ALERTA = [
+  "Inclinación pronunciada del fuste",
+  "Grietas en la base del suelo",
+  "Raíces levantadas, cortadas o expuestas",
+  "Cuello del árbol tapado por sustrato",
+  "Hongos",
+  "Cavidades, pudrición o huecos en el tronco",
+  "Ramas o frondas secas, quebradas o muertas",
+  "Hojas o frondas faltantes",
+  "Corteza pelada",
+  "Manchas hinchadas o protuberancias",
+  "Hojas descoloridas",
+  "Abundancia de líquenes o epífitas",
+  "Podas inadecuadas",
+  "Plantas o amarres artificiales sobre el fuste",
+] as const;
+
+/** Señales que apuntan a un problema estructural o sanitario real (no solo de manejo): si hay alguna, el estado general rara vez es «bueno». */
+export const SENALES_DANO: readonly string[] = [
+  "Inclinación pronunciada del fuste", "Grietas en la base del suelo", "Raíces levantadas, cortadas o expuestas", "Hongos",
+  "Cavidades, pudrición o huecos en el tronco", "Ramas o frondas secas, quebradas o muertas", "Corteza pelada",
+  "Manchas hinchadas o protuberancias",
+];
+
+/** Intervenciones frecuentes para agregar con un toque a «tratamiento recomendado». */
+export const RECOMENDACIONES_RAPIDAS = [
+  "Poda de mantenimiento (fitosanitaria: ramas quebradas, secas o enfermas)",
+  "Poda de control de ramas o frondas a menos de 2 o 3 m de la construcción",
+  "Retiro de hojas secas",
+  "Destapar el cuello del árbol",
+  "Limpieza de líquenes y epífitas",
+  "Control fitosanitario",
+  "Control nutricional",
+  "Seguimiento y monitoreo periódico",
+  "Malla de protección contra caída de ramas",
+  "Apuntalamiento",
+  "Trasplante (requiere permiso de la autoridad ambiental)",
+  "Tala (requiere permiso y compensación)",
+] as const;
+
+/** Sitios de siembra frecuentes (sugerencias; el campo es de texto libre). */
+export const SITIOS_SIEMBRA = [
+  "Andén", "Separador vial", "Antejardín", "Parque o zona verde", "Talud",
+  "Terraza o estructura artificial (muro de piedra, contención)", "Jardinera o alcorque", "Ronda hídrica",
+] as const;
+
 export type CampoEnumerado = keyof typeof OPCIONES_INVENTARIO;
 export const CAMPOS_ENUMERADOS = Object.keys(OPCIONES_INVENTARIO) as CampoEnumerado[];
 
@@ -31,8 +81,11 @@ export interface FormEvaluacion {
   evaluador: string;
   fecha: string; // AAAA-MM-DD
   zona: string; // opcional: municipio, barrio, proyecto... (texto libre, no entra al calculo)
+  solicitud: string; // opcional: expediente, solicitud o tramite que origina la visita
+  predio: string; // opcional: nombre del predio, matricula inmobiliaria o NPN
   lat: number | null;
   lon: number | null;
+  altitudM: number | null; // opcional (la toma el GPS)
   dap: number | null; // cm
   catDiametrica: CategoriaDiametrica | null;
   alturaArbolM: number | null;
@@ -64,6 +117,8 @@ export interface FormEvaluacion {
   tratamientoRealizado: (typeof OPCIONES_INVENTARIO.tratamientoRealizado)[number] | null;
   interferencia: (typeof OPCIONES_INVENTARIO.interferencia)[number] | null;
   recomendacion: string; // tratamiento / intervencion recomendada
+  senales: string[]; // senales de alerta observadas (SENALES_ALERTA)
+  distanciaConstruccionM: number | null; // del fuste a la construccion mas cercana (no entra al calculo)
   // Decision del tecnico (opcional)
   decisionFinalId: string | null;
   justificacion: string;
@@ -71,14 +126,14 @@ export interface FormEvaluacion {
 
 export function formVacio(hoy = new Date().toISOString().slice(0, 10)): FormEvaluacion {
   return {
-    codigo: "", especie: "", evaluador: "", fecha: hoy, zona: "", lat: null, lon: null, dap: null,
+    codigo: "", especie: "", evaluador: "", fecha: hoy, zona: "", solicitud: "", predio: "", lat: null, lon: null, altitudM: null, dap: null,
     catDiametrica: null, alturaArbolM: null, estadoGeneral: null, inclinacionGrados: null,
     ramaDiametroCm: null, ramaEstado: null, ramaAlturaM: null, raices: null,
     personas: null, vehiculos: null, construcciones: null, redesAereas: null,
     pendiente: "", sitioSiembra: "", observaciones: "",
     familia: "", habito: null, madurez: null, origen: null, fustes: null, diametroCopaM: null, fenologia: null,
     estadoFitosanitario: null, prioridad: null, tomografia: null, tratamientoRealizado: null, interferencia: null,
-    recomendacion: "",
+    recomendacion: "", senales: [], distanciaConstruccionM: null,
     decisionFinalId: null, justificacion: "",
   };
 }
@@ -123,6 +178,7 @@ export function validarForm(f: FormEvaluacion, categoriaCalculadaId?: string): E
     if (f[k] === null) e[k] = REQ;
 
   if (f.diametroCopaM !== null && !noNeg(f.diametroCopaM)) e.diametroCopaM = "No puede ser negativo";
+  if (f.distanciaConstruccionM !== null && !noNeg(f.distanciaConstruccionM)) e.distanciaConstruccionM = "No puede ser negativa";
   if (f.decisionFinalId && categoriaCalculadaId && f.decisionFinalId !== categoriaCalculadaId && !f.justificacion.trim())
     e.justificacion = "Justifica por qué la decisión final difiere del cálculo";
   return e;

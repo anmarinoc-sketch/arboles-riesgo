@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 import { db, type EvaluacionDB } from "../../db/db";
-import { aEntrada, calcularRiesgo } from "../../engine";
+import { aEntrada, buscarEspecie, calcularRiesgo, esAmenazada, nombreAmenaza } from "../../engine";
 import { categorizarActual, useCategorias } from "../../lib/categorias";
 import { inventario, tabla65, tabla66 } from "../../lib/resumen";
 import { evaluacionesACSV, evaluacionesAGeoJSON, plantillaCSV } from "../../lib/exportar";
@@ -13,6 +13,7 @@ import SyncCard from "../sync/SyncCard";
 export default function ResumenPage() {
   const evals = useLiveQuery(() => db.evaluaciones.toArray(), []) ?? [];
   useCategorias(); // las tablas dependen de los umbrales vigentes
+  const catalogo = useLiveQuery(() => db.especies.toArray(), []) ?? [];
   const t65 = tabla65(evals), t66 = tabla66(evals), inv = inventario(evals);
   const [lectura, setLectura] = useState<{ nombre: string; datos: LecturaCSV } | null>(null);
   const [msg, setMsg] = useState("");
@@ -91,10 +92,13 @@ export default function ResumenPage() {
           <h2>Inventario por especie</h2>
           <div className="tabla-scroll">
             <table className="tabla">
-              <thead><tr><th>Especie</th><th>Origen</th><th>Cantidad</th></tr></thead>
+              <thead><tr><th>Especie</th><th>Origen</th><th>Amenaza</th><th>Cantidad</th></tr></thead>
               <tbody>
-                {inv.especies.map(e => <tr key={e.especie}><td><i>{e.especie}</i></td><td>{e.origen || "—"}</td><td>{e.cantidad}</td></tr>)}
-                <tr className="total"><td>Total</td><td>{inv.especies.length} especies</td><td>{inv.total}</td></tr>
+                {inv.especies.map(e => {
+                  const am = buscarEspecie(e.especie, catalogo)?.categoriaAmenaza;
+                  return <tr key={e.especie}><td><i>{e.especie}</i></td><td>{e.origen || "—"}</td><td>{am ? nombreAmenaza(am).replace(/.*\(|\)/g, "") : "—"}</td><td>{e.cantidad}</td></tr>;
+                })}
+                <tr className="total"><td>Total</td><td>{inv.especies.length} especies</td><td>{inv.especies.filter(e => esAmenazada(buscarEspecie(e.especie, catalogo)?.categoriaAmenaza)).length} amenazadas</td><td>{inv.total}</td></tr>
               </tbody>
             </table>
           </div>
