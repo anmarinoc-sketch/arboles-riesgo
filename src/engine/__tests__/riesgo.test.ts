@@ -57,7 +57,7 @@ describe("motor de riesgo 3.7", () => {
   });
 });
 
-describe("categorías (Tabla 64) y límites", () => {
+describe("categorías de riesgo y límites", () => {
   it.each([
     [0, "Bajo"], [29.99, "Bajo"], [30, "Medio-Bajo"], [49.99, "Medio-Bajo"],
     [50, "Medio-Alto"], [60, "Medio-Alto"], [60.01, "Alto"], [100, "Alto"],

@@ -45,8 +45,8 @@ export default function UmbralesCard() {
     <section className="card">
       <h2>Umbrales de riesgo</h2>
       <p className="muted">
-        Cómo se agrupa el porcentaje de riesgo en categorías. Los valores iniciales son los de la Tabla 64 del Plan
-        Maestro de Envigado; cámbialos si tu entidad usa otros. El modelo de cálculo (Vo, Cr, Ra, V) no cambia.
+        Cómo se agrupa el porcentaje de riesgo en categorías. Los valores iniciales son los del Plan
+        Maestro de Envigado (menos de 30 %, de 30 a 50 %, de 50 a 60 % y más de 60 %); cámbialos si tu entidad usa otros. El modelo de cálculo (Vo, Cr, Ra, V) no cambia.
       </p>
 
       {borrador.map((c, i) => (
@@ -75,8 +75,8 @@ export default function UmbralesCard() {
 
       <button className="grande" disabled={errores.length > 0 || sinCambios} onClick={guardar}>Guardar umbrales</button>
       <button className="secundario" disabled={esDefecto && sinCambios}
-        onClick={() => { if (confirm("¿Volver a los umbrales de la Tabla 64?")) { restaurarCategorias(); setAviso("Se restauró la Tabla 64."); } }}>
-        Restaurar Tabla 64
+        onClick={() => { if (confirm("¿Volver a los umbrales iniciales?")) { restaurarCategorias(); setAviso("Se restauraron los umbrales iniciales."); } }}>
+        Restaurar umbrales iniciales
       </button>
       {aviso && <p className="ok" role="status">{aviso}</p>}
 

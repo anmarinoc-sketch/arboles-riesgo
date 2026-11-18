@@ -9,7 +9,7 @@ const con = (hastas: (number | null)[], inclusivos = [false, false, true, false]
   base.map((c, i) => ({ ...c, hasta: hastas[i], inclusivo: inclusivos[i] }));
 
 describe("umbrales editables", () => {
-  it("los valores por defecto son válidos y describen la Tabla 64", () => {
+  it("los valores por defecto son válidos y describen los rangos iniciales", () => {
     expect(validarCategorias(base)).toEqual([]);
     expect(describirRangos(base)).toEqual([
       "Bajo: < 30 %", "Medio-Bajo: ≥ 30 y < 50 %", "Medio-Alto: ≥ 50 y ≤ 60 %", "Alto: > 60 %",
@@ -38,7 +38,7 @@ describe("umbrales editables", () => {
     expect(categorizar(70, c).id).toBe("alto"); // no inclusivo
     expect(describirRangos(c)[2]).toBe("Medio-Alto: > 40 y < 70 %");
   });
-  it("guardar cambia lo que usa la app; restaurar vuelve a la Tabla 64; guardar inválido no cambia nada", () => {
+  it("guardar cambia lo que usa la app; restaurar vuelve a los iniciales; guardar inválido no cambia nada", () => {
     expect(guardarCategorias(con([10, 20, 30, null]))).toEqual([]);
     expect(categorizarActual(35).id).toBe("alto");
     expect(guardarCategorias(con([50, 40, 60, null])).length).toBeGreaterThan(0);

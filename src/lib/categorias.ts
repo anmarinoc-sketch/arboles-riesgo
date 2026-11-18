@@ -2,7 +2,7 @@ import { useSyncExternalStore } from "react";
 import umbrales from "../config/umbrales.json";
 import { categorizar, type CategoriaConfig } from "../engine";
 
-/** Valores de la Tabla 64 (src/config/umbrales.json). */
+/** Umbrales iniciales de las categorias de riesgo (src/config/umbrales.json). */
 export const CATEGORIAS_POR_DEFECTO = umbrales.categorias as CategoriaConfig[];
 
 /** Lo unico que se puede editar de cada categoria; el id, el nombre y el orden son fijos. */

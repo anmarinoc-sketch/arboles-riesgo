@@ -74,7 +74,7 @@ se abre con el engranaje de arriba.
 | **Evaluar** (botón +) | Formulario **por pasos**: 1 Datos, 2 Ubicación, 3 Riesgo, 4 Evidencia (inventario, fotos y resultado). La barra de riesgo queda fija arriba. Si falta un dato obligatorio al guardar, te lleva al primer paso con error. |
 | **Lista** | Evaluaciones guardadas, con filtros por categoría de riesgo, especie y categoría diamétrica. Ficha PDF y eliminar. |
 | **Mapa** | Puntos coloreados por categoría (mismos filtros). |
-| **Resumen** | Tablas 65 y 66, inventario, exportación (CSV, GeoJSON), importación desde CSV y sincronización opcional. |
+| **Resumen** | Árboles por tamaño y nivel de riesgo, eucaliptos frente a las demás especies, inventario por especie, exportación (CSV, GeoJSON), importación desde CSV y sincronización opcional. |
 | **Aprender y guía** | Cómo se calcula el riesgo, cómo medir en campo, señales de alerta, y alcance y límites. Los valores salen de las mismas constantes del cálculo. |
 | **Ajustes** | Método de vulnerabilidad, umbrales de las categorías y catálogo editable de especies con sus factores Sp. |
 
@@ -105,7 +105,7 @@ no fueron estadísticamente significativos).
 En **Ajustes → Umbrales de riesgo** se cambian, por categoría: el límite superior en %, si el valor exacto del
 límite pertenece a esa categoría o a la siguiente, la acción recomendada y el color. El nombre y el orden de las
 cuatro categorías son fijos. La pantalla muestra los rangos resultantes y no deja guardar límites que no sean
-crecientes, que pasen de 100 %, o colores y acciones vacíos. «Restaurar Tabla 64» vuelve a los valores iniciales.
+crecientes, que pasen de 100 %, o colores y acciones vacíos. «Restaurar umbrales iniciales» vuelve a los valores de partida.
 
 Los umbrales se guardan en el dispositivo (no en el archivo de configuración): cada celular tiene los suyos, así
 que conviene fijarlos igual en todos los equipos de un proyecto. Las evaluaciones ya guardadas **conservan la
@@ -117,7 +117,7 @@ valores iniciales siguen en [`src/config/umbrales.json`](src/config/umbrales.jso
 
 El documento no precisa qué pasa justo en los bordes. Quedaron así y se pueden cambiar:
 
-- **Categorías (Tabla 64)**, valores iniciales en [`src/config/umbrales.json`](src/config/umbrales.json) y editables en Ajustes: Bajo < 30; Medio-Bajo desde
+- **Categorías de riesgo**, valores iniciales en [`src/config/umbrales.json`](src/config/umbrales.json) y editables en Ajustes: Bajo < 30; Medio-Bajo desde
   30 hasta menos de 50; Medio-Alto desde 50 hasta 60 inclusive; Alto > 60. Cada categoría tiene `hasta`,
   `inclusivo`, color y acción. La comparación tolera ruido de coma flotante en los bordes.
 - **Variables**, en `LIMITES` de [`src/engine/riesgo.ts`](src/engine/riesgo.ts): 10 y 20 m exactos cuentan como
@@ -151,13 +151,13 @@ sí conviene revisar al salir de Envigado:
 - **Catálogo de especies:** la lista inicial y su calibración (eucalipto = 1, el resto 1/3) vienen de Envigado.
   Cualquier especie que no esté en el catálogo usa 2/3 («sin información»), así que la app sirve con especies de
   cualquier parte. Para una región nueva, edita los factores, **importa tu propio catálogo en CSV** o vacíalo.
-- **Umbrales de categoría:** los iniciales son los de la Tabla 64 (30 / 50 / 60 %), definidos con el grupo de
+- **Umbrales de categoría:** los iniciales son 30 / 50 / 60 %, definidos con el grupo de
   interventores de la región del estudio. Si tu entidad usa otros, edítalos en la app (ver «Umbrales editables»).
 - **Idioma:** la interfaz está en español; las unidades son métricas.
 
 ### Catálogo de especies
 
-[`src/config/especies.seed.json`](src/config/especies.seed.json) trae 38 especies de las Tablas 67 y 68.
+[`src/config/especies.seed.json`](src/config/especies.seed.json) trae la lista inicial de especies del Plan Maestro de Envigado.
 Calibración del numeral 3.7.5: *Eucalyptus* spp. = 1 en volcamiento y en caída de ramas; las demás = 1/3.
 Una especie que no está en el catálogo, o «Indeterminado», usa 2/3. En la pestaña **Especies** se puede editar
 cada factor entre 1/3, 2/3 y 1 cuando haya información, y exportar o importar el catálogo como CSV
@@ -213,6 +213,21 @@ Todo esto es opcional y **no entra en el cálculo del riesgo**:
 - **Ficha PDF:** suma solicitud, predio, categoría de amenaza, distancia, altitud, señales y una nota de **alcance**
   (inspección visual externa; no evalúa el sistema radicular interno ni el estado estructural de terrazas o muros donde
   esté plantado el individuo).
+
+## Para qué sirve cada resumen
+
+La pestaña **Resumen** reúne los conteos que normalmente se piden en un informe de inventario de riesgo. Se calculan
+con las evaluaciones guardadas en el dispositivo:
+
+- **Árboles por tamaño y nivel de riesgo:** cuántos árboles hay en cada categoría diamétrica (Brinzal, Latizal, Fustal)
+  y en cada categoría de riesgo. Sirve para ver dónde se concentra el riesgo y por dónde empezar a intervenir.
+- **Eucaliptos frente a las demás especies:** reparte el riesgo entre los eucaliptos y el resto, con el porcentaje de
+  cada grupo en cada categoría. Se separan porque el modelo calibra el eucalipto como de mayor propensión a volcarse y
+  a perder ramas; sirve para decidir si necesitan un manejo aparte. Sin eucaliptos, queda en cero.
+- **Inventario por especie:** cantidad por especie, origen (nativa o introducida), categoría de amenaza, y conteos por
+  prioridad de intervención y estado fitosanitario.
+
+Son conteos, no un informe completo: el texto, las conclusiones y los anexos de un informe técnico se redactan aparte.
 
 ## Marca y diseño
 
@@ -270,7 +285,7 @@ dispositivo.
 ```
 src/
 ├─ engine/      Motor de cálculo puro (sin React ni DOM) y sus pruebas
-├─ config/      umbrales.json (Tabla 64) y especies.seed.json
+├─ config/      umbrales.json (umbrales de riesgo) y especies.seed.json (lista inicial de especies)
 ├─ db/          Dexie: especies, evaluaciones, fotos
 ├─ lib/         Filtros, resumen, CSV, exportar, importar, ficha PDF, sincronización
 ├─ components/  Controles reutilizables y aviso probabilístico

@@ -55,7 +55,12 @@ export default function ResumenPage() {
   return (
     <>
       <section className="card">
-        <h2>Tabla 65 · Individuos por categoría diamétrica y de riesgo</h2>
+        <h2>Árboles por tamaño y nivel de riesgo</h2>
+        <p className="muted">
+          Cuenta cuántos árboles hay en cada categoría diamétrica (Brinzal, Latizal, Fustal) y en cada categoría de riesgo.
+          Sirve para ver dónde se concentra el riesgo, por ejemplo si los árboles grandes son los más críticos, y para
+          decidir por dónde empezar las intervenciones.
+        </p>
         <div className="tabla-scroll">
           <table className="tabla">
             <thead><tr><th>Categoría</th>{t65.columnas.map(c => <th key={c.id}>{c.nombre}</th>)}<th>Total</th></tr></thead>
@@ -71,7 +76,12 @@ export default function ResumenPage() {
       </section>
 
       <section className="card">
-        <h2>Tabla 66 · Eucaliptos frente al resto de especies</h2>
+        <h2>Eucaliptos frente a las demás especies</h2>
+        <p className="muted">
+          Compara cómo se reparte el riesgo entre los eucaliptos y el resto del arbolado. Se separan porque el modelo los
+          trata como de mayor propensión a volcarse y a perder ramas, así que sirve para ver si necesitan un manejo
+          aparte. Si no hay eucaliptos en tu inventario, esa columna queda en cero.
+        </p>
         <div className="tabla-scroll">
           <table className="tabla">
             <thead><tr><th>Categoría</th><th>Resto</th><th>Eucaliptos</th><th>% resto</th><th>% euc.</th><th>Total</th></tr></thead>

@@ -10,13 +10,13 @@ const d = [
   { categoriaId: "bajo", catDiametrica: "Fustal", especie: "Psidium guajava" },
 ];
 
-describe("resumen Tablas 65 y 66", () => {
+describe("resumen por tamaño y riesgo, y eucaliptos frente al resto", () => {
   it("detecta eucaliptos por género", () => {
     expect(esEucalipto("Eucalyptus spp.")).toBe(true);
     expect(esEucalipto(" eucalyptus globulus")).toBe(true);
     expect(esEucalipto("Eucalypto")).toBe(false);
   });
-  it("Tabla 65: conteo por categoría diamétrica × riesgo", () => {
+  it("conteo por categoría diamétrica × riesgo", () => {
     const t = tabla65(d);
     expect(t.columnas.map(c => c.id)).toEqual(["alto", "medio-alto", "medio-bajo", "bajo"]);
     const fustal = t.filas.find(f => f.catDiametrica === "Fustal")!;
@@ -25,7 +25,7 @@ describe("resumen Tablas 65 y 66", () => {
     expect(t.totales).toEqual({ alto: 2, "medio-alto": 3, "medio-bajo": 0, bajo: 1 });
     expect(t.total).toBe(6);
   });
-  it("Tabla 66: eucaliptos frente al resto y porcentajes relativos", () => {
+  it("eucaliptos frente al resto y porcentajes relativos", () => {
     const t = tabla66(d);
     const ma = t.filas.find(f => f.categoriaId === "medio-alto")!;
     expect(ma).toMatchObject({ resto: 1, eucaliptos: 2, total: 3 });

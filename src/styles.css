@@ -167,3 +167,9 @@ main.sin-margen { margin: 0 -16px; }
 .categorias-guia .punto { width: 16px; height: 16px; margin-top: 4px; flex: none; }
 .tabla.guia td:last-child { white-space: normal; text-align: left; }
 .tabla.guia td:first-child { white-space: normal; font-weight: 600; }
+
+/* tablas de resumen: caben en pantallas angostas sin desplazamiento lateral */
+@media (max-width: 420px) {
+  .tabla { font-size: .76rem; }
+  .tabla th, .tabla td { padding: 6px 2px; white-space: normal; }
+}

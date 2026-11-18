@@ -116,7 +116,7 @@ export default function EspeciesPage() {
       <section className="card">
         <h3>Catálogo de tu región</h3>
         <p className="muted">
-          La lista inicial viene de las Tablas 67 y 68 del Plan Maestro de Envigado y su calibración (eucalipto = 1, las
+          La lista inicial viene del Plan Maestro de Envigado y su calibración (eucalipto = 1, las
           demás 1/3) es de allí. En otro lugar, ajusta los factores con lo que se sepa de las especies locales, o carga tu
           propio catálogo desde un CSV (columnas: cientifico, comun, sp_volcamiento, sp_caida_ramas y, opcional, categoria_amenaza con CR, EN, VU, NT, LC o DD).
         </p>
@@ -130,8 +130,8 @@ export default function EspeciesPage() {
         </label>
         <p className="muted">Si una especie ya existe, se actualizan sus factores; las demás no se tocan.</p>
         {aviso && <p className={aviso.error ? "error banner" : "ok"} role="status">{aviso.texto}</p>}
-        <button className="secundario" onClick={() => confirm("Restaurar los valores de la semilla (Tablas 67-68)?") && restaurarSemilla()}>
-          Restaurar valores de la semilla
+        <button className="secundario" onClick={() => confirm("¿Restaurar los valores de la lista inicial de especies?") && restaurarSemilla()}>
+          Restaurar la lista inicial
         </button>
         <button className="peligro" onClick={() => confirm("¿Vaciar todo el catálogo? Todas las especies pasarán a «sin información» (2/3) hasta que cargues otras.") && db.especies.clear()}>
           Vaciar catálogo

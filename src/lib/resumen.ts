@@ -5,7 +5,7 @@ interface Item { categoriaId: string; catDiametrica: string; especie: string }
 
 export const esEucalipto = (especie: string) => /^eucalyptus\b/i.test(especie.trim());
 
-/** Tabla 65: individuos por categoria diametrica y categoria de riesgo. */
+/** Arboles por categoria diametrica y categoria de riesgo. */
 export interface Tabla65 {
   columnas: { id: string; nombre: string }[];
   filas: { catDiametrica: string; conteos: Record<string, number>; total: number }[];
@@ -26,7 +26,7 @@ export function tabla65(items: Item[]): Tabla65 {
   return { columnas, filas, totales, total: filas.reduce((a, f) => a + f.total, 0) };
 }
 
-/** Tabla 66: eucaliptos frente al resto de especies, por categoria de riesgo. */
+/** Eucaliptos frente al resto de especies, por categoria de riesgo. */
 export interface Tabla66 {
   filas: { categoriaId: string; nombre: string; resto: number; eucaliptos: number; total: number; pctResto: number; pctEucaliptos: number }[];
   totalResto: number;
