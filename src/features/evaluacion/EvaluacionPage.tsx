@@ -13,6 +13,8 @@ import { categorizarActual, useCategorias } from "../../lib/categorias";
 import { useModoV } from "../../lib/metodo";
 import { buscarEspecie, esAmenazada, nombreAmenaza } from "../../engine";
 import ResultadoPanel from "./ResultadoPanel";
+import { PASOS, pasosConError, primerPasoConError } from "./pasos";
+import { IconoAtras, IconoCheck } from "../../components/Iconos";
 import SelectorPunto from "../mapa/SelectorPunto";
 import { fmt } from "../../lib/util";
 
@@ -38,7 +40,7 @@ const nuevoForm = (): FormEvaluacion => ({
   solicitud: leerTxt("arboles.solicitud"), predio: leerTxt("arboles.predio"),
 });
 
-export default function EvaluacionPage() {
+export default function EvaluacionPage({ activa = true }: { activa?: boolean } = {}) {
   const catalogo = useLiveQuery(() => db.especies.toArray(), []) ?? [];
   const [form, setForm] = useState<FormEvaluacion>(nuevoForm);
   const [fotos, setFotos] = useState<{ blob: Blob; nombre: string; url: string }[]>([]);
@@ -47,6 +49,7 @@ export default function EvaluacionPage() {
   const [gps, setGps] = useState("");
   const [mapaAbierto, setMapaAbierto] = useState(false);
   const raiz = useRef<HTMLDivElement>(null);
+  const [paso, setPaso] = useState(1);
 
   const set = (c: Partial<FormEvaluacion>) => setForm(f => ({ ...f, ...c }));
 
@@ -57,6 +60,8 @@ export default function EvaluacionPage() {
   const categoria = useMemo(() => (resultado ? categorizarActual(resultado.porcentaje) : null), [resultado, categorias]);
   const errores = useMemo(() => validarForm(form, categoria?.id), [form, categoria]);
   const ver = (k: keyof FormEvaluacion) => (intentado ? errores[k] : undefined);
+  useEffect(() => { if (activa) window.scrollTo({ top: 0 }); }, [paso, activa]);
+  const conError = pasosConError(errores);
   const sp = resolverSp(form.especie, catalogo);
   const plano = wgs84AOrigenNacional(form.lat, form.lon); // solo dentro de Colombia
   const amenaza = buscarEspecie(form.especie, catalogo)?.categoriaAmenaza;
@@ -110,6 +115,8 @@ export default function EvaluacionPage() {
     setMensaje(null);
     if (Object.keys(errores).length > 0 || !resultado || !categoria) {
       setMensaje({ tipo: "error", texto: `Faltan datos obligatorios (${Object.keys(errores).length}). Revisa los campos marcados.` });
+      const p = primerPasoConError(errores);
+      if (p) setPaso(p);
       setTimeout(() => raiz.current?.querySelector(".con-error")?.scrollIntoView({ behavior: "smooth", block: "center" }), 50);
       return;
     }
@@ -135,6 +142,7 @@ export default function EvaluacionPage() {
     setFotos([]);
     setForm({ ...nuevoForm(), evaluador: form.evaluador.trim(), zona: form.zona.trim(), solicitud: form.solicitud.trim(), predio: form.predio.trim() });
     setIntentado(false);
+    setPaso(1);
     setGps("");
     setMensaje({ tipo: "ok", texto: `Evaluación ${codigo} guardada (${categoria.nombre}, ${fmt(resultado.porcentaje, 1)} %).` });
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -151,9 +159,24 @@ export default function EvaluacionPage() {
           : <span>Riesgo: completa las variables</span>}
       </div>
 
+      <ol className="pasos" aria-label="Pasos de la evaluación">
+        {PASOS.map(p => {
+          const error = intentado && conError.includes(p.n);
+          const hecho = p.n < paso && !conError.includes(p.n);
+          return (
+            <li key={p.n} className={(p.n === paso ? "actual " : "") + (hecho ? "hecho " : "") + (error ? "con-error" : "")}>
+              <button type="button" onClick={() => setPaso(p.n)} aria-current={p.n === paso ? "step" : undefined}>
+                <span className="num">{hecho ? <IconoCheck size={16} /> : p.n}</span>
+                <span className="nom">{p.nombre}</span>
+              </button>
+            </li>
+          );
+        })}
+      </ol>
+
       {mensaje && <p className={mensaje.tipo === "ok" ? "ok" : "error banner"} role="status">{mensaje.texto}</p>}
 
-      <section className="card">
+      <section className="card" hidden={paso !== 1}>
         <h2>Identificación</h2>
         <Campo label="Código del árbol" error={ver("codigo")}
           hint="Sugerencia: inicial de la zona + número de parque + consecutivo, p. ej. SD2_1">
@@ -190,7 +213,7 @@ export default function EvaluacionPage() {
         </Campo>
       </section>
 
-      <section className="card">
+      <section className="card" hidden={paso !== 2}>
         <h2>Ubicación</h2>
         <button type="button" className="grande" onClick={ubicar}>📍 Usar mi ubicación (GPS)</button>
         <button type="button" className="secundario" onClick={() => setMapaAbierto(true)}>🗺️ Elegir punto en el mapa</button>
@@ -208,7 +231,7 @@ export default function EvaluacionPage() {
         {plano && <p className="muted">MAGNA Origen Nacional: X {plano.x.toFixed(2).replace(".", ",")} · Y {plano.y.toFixed(2).replace(".", ",")}</p>}
       </section>
 
-      <section className="card">
+      <section className="card" hidden={paso !== 1}>
         <h2>Árbol</h2>
         <NumInput label="DAP" unidad="cm" value={form.dap} onChange={dap => set({ dap })} error={ver("dap")}
           hint="A 1,30 m. En pendiente o inclinado, desde el lado más cercano al suelo; con bambas o heridas, en el punto óptimo de medición" />
@@ -224,7 +247,7 @@ export default function EvaluacionPage() {
         )}
       </section>
 
-      <section className="card">
+      <section className="card" hidden={paso !== 4}>
         <h2>Inventario (opcional)</h2>
         <p className="muted">Datos de la ficha técnica del individuo. No entran en el cálculo del riesgo. Toca de nuevo una opción para quitarla.</p>
         <Campo label="Familia botánica">
@@ -276,7 +299,7 @@ export default function EvaluacionPage() {
         </Campo>
       </section>
 
-      <section className="card">
+      <section className="card" hidden={paso !== 3}>
         <h2>Amenaza · Volcamiento (Vo)</h2>
         <Segmentado label="Estado general del árbol" value={form.estadoGeneral} options={ESTADO_EG} error={ver("estadoGeneral")}
           hint="Daño mecánico, estado fitosanitario, plagas" onChange={estadoGeneral => set({ estadoGeneral })} />
@@ -284,7 +307,7 @@ export default function EvaluacionPage() {
           onChange={inclinacionGrados => set({ inclinacionGrados })} error={ver("inclinacionGrados")} hint="Hasta 30° = 0 · más de 30° = 1" />
       </section>
 
-      <section className="card">
+      <section className="card" hidden={paso !== 3}>
         <h2>Amenaza · Caída de ramas (Cr)</h2>
         <p className="muted">Califica la rama más crítica del árbol.</p>
         {form.habito === "Palma" && <p className="muted">En palmas, califica la hoja (fronda) más crítica: su diámetro, estado y altura equivalen a los de la rama.</p>}
@@ -296,13 +319,13 @@ export default function EvaluacionPage() {
           error={ver("ramaAlturaM")} hint="Menos de 5 m = 0 · más de 5 m = 1" />
       </section>
 
-      <section className="card">
+      <section className="card" hidden={paso !== 3}>
         <h2>Amenaza · Raíces (Ra)</h2>
         <Segmentado label="Estado de las raíces" value={form.raices} options={ESTADO} error={ver("raices")}
           onChange={raices => set({ raices })} />
       </section>
 
-      <section className="card">
+      <section className="card" hidden={paso !== 3}>
         <h2>Vulnerabilidad (V)</h2>
         <p className="muted">Si hay al menos un elemento expuesto, V = 1.</p>
         <Segmentado label="Personas que transitan, permanecen o viven cerca" value={form.personas} options={SI_NO} error={ver("personas")} onChange={personas => set({ personas })} />
@@ -312,7 +335,7 @@ export default function EvaluacionPage() {
           hint="Las redes subterráneas no cuentan" onChange={redesAereas => set({ redesAereas })} />
       </section>
 
-      <section className="card">
+      <section className="card" hidden={paso !== 4}>
         <h2>Datos descriptivos (opcional)</h2>
         <p className="muted">No entran en el cálculo: según el numeral 3.7.5 no fueron estadísticamente significativos.</p>
         <Campo label="Pendiente" hint={equivPendiente ?? "Escribe con unidad (32° o 62,8 %) y verás la equivalencia."}>
@@ -327,7 +350,7 @@ export default function EvaluacionPage() {
         </Campo>
       </section>
 
-      <section className="card">
+      <section className="card" hidden={paso !== 4}>
         <h2>Fotos</h2>
         <label className="boton-archivo">
           📷 Tomar o elegir fotos
@@ -345,9 +368,16 @@ export default function EvaluacionPage() {
         </div>
       </section>
 
-      <ResultadoPanel resultado={resultado} categoria={categoria} form={form} errores={intentado ? errores : {}} set={set} />
+      <div hidden={paso !== 4}>
+        <ResultadoPanel resultado={resultado} categoria={categoria} form={form} errores={intentado ? errores : {}} set={set} />
+      </div>
 
-      <button className="grande" onClick={guardar}>Guardar evaluación</button>
+      <div className="acciones-paso">
+        {paso > 1 && <button type="button" className="atras" onClick={() => setPaso(paso - 1)}><IconoAtras size={20} /> Atrás</button>}
+        {paso < PASOS.length
+          ? <button type="button" className="grande continuar" onClick={() => setPaso(paso + 1)}>Continuar</button>
+          : <button type="button" className="grande continuar" onClick={guardar}>Guardar evaluación</button>}
+      </div>
     </div>
   );
 }

@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 240" role="img" aria-label="Árboles en Riesgo">
+  <defs>
+    <linearGradient id="aro" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1f5a2a"/><stop offset="1" stop-color="#7cb518"/>
+    </linearGradient>
+  </defs>
+  <!-- aro -->
+  <path d="M38 118 A82 82 0 0 0 202 118" fill="none" stroke="url(#aro)" stroke-width="11" stroke-linecap="round"/>
+  <!-- tronco y ramas -->
+  <g fill="none" stroke="#2b2a1e" stroke-linecap="round">
+    <path d="M120 190 L120 112" stroke-width="14"/>
+    <path d="M120 128 Q100 118 88 94" stroke-width="8"/>
+    <path d="M120 120 Q142 110 154 88" stroke-width="8"/>
+  </g>
+  <!-- copa -->
+  <g>
+    <path d="M0 0 C19.5 -14.3 19.5 -42.9 0 -57.2 C-19.5 -42.9 -19.5 -14.3 0 0 Z" fill="#2e7d32" transform="translate(103.4 116.7) rotate(-105.0)"/>
+    <path d="M0 0 C19.5 -12.3 19.5 -37.0 0 -49.4 C-19.5 -37.0 -19.5 -12.3 0 0 Z" fill="#4caf50" transform="translate(102.9 110.1) rotate(-84.0)"/>
+    <path d="M0 0 C19.5 -14.3 19.5 -42.9 0 -57.2 C-19.5 -42.9 -19.5 -14.3 0 0 Z" fill="#7cb518" transform="translate(104.8 103.7) rotate(-63.0)"/>
+    <path d="M0 0 C19.5 -12.3 19.5 -37.0 0 -49.4 C-19.5 -37.0 -19.5 -12.3 0 0 Z" fill="#388e3c" transform="translate(108.8 98.5) rotate(-42.0)"/>
+    <path d="M0 0 C19.5 -14.3 19.5 -42.9 0 -57.2 C-19.5 -42.9 -19.5 -14.3 0 0 Z" fill="#2e7d32" transform="translate(114.5 95.0) rotate(-21.0)"/>
+    <path d="M0 0 C19.5 -12.3 19.5 -37.0 0 -49.4 C-19.5 -37.0 -19.5 -12.3 0 0 Z" fill="#4caf50" transform="translate(121.0 93.8) rotate(0.0)"/>
+    <path d="M0 0 C19.5 -14.3 19.5 -42.9 0 -57.2 C-19.5 -42.9 -19.5 -14.3 0 0 Z" fill="#7cb518" transform="translate(127.5 95.0) rotate(21.0)"/>
+    <path d="M0 0 C19.5 -12.3 19.5 -37.0 0 -49.4 C-19.5 -37.0 -19.5 -12.3 0 0 Z" fill="#388e3c" transform="translate(133.2 98.5) rotate(42.0)"/>
+    <path d="M0 0 C19.5 -14.3 19.5 -42.9 0 -57.2 C-19.5 -42.9 -19.5 -14.3 0 0 Z" fill="#2e7d32" transform="translate(137.2 103.7) rotate(63.0)"/>
+    <path d="M0 0 C19.5 -12.3 19.5 -37.0 0 -49.4 C-19.5 -37.0 -19.5 -12.3 0 0 Z" fill="#4caf50" transform="translate(139.1 110.1) rotate(84.0)"/>
+    <path d="M0 0 C19.5 -14.3 19.5 -42.9 0 -57.2 C-19.5 -42.9 -19.5 -14.3 0 0 Z" fill="#7cb518" transform="translate(138.6 116.7) rotate(105.0)"/>
+    <path d="M0 0 C14.3 -9.8 14.3 -29.2 0 -39.0 C-14.3 -29.2 -14.3 -9.8 0 0 Z" fill="#7cb518" transform="translate(113.7 109.3) rotate(-70.0)"/>
+    <path d="M0 0 C14.3 -9.8 14.3 -29.2 0 -39.0 C-14.3 -29.2 -14.3 -9.8 0 0 Z" fill="#388e3c" transform="translate(115.3 106.6) rotate(-46.7)"/>
+    <path d="M0 0 C14.3 -9.8 14.3 -29.2 0 -39.0 C-14.3 -29.2 -14.3 -9.8 0 0 Z" fill="#2e7d32" transform="translate(117.9 104.8) rotate(-23.3)"/>
+    <path d="M0 0 C14.3 -9.8 14.3 -29.2 0 -39.0 C-14.3 -29.2 -14.3 -9.8 0 0 Z" fill="#4caf50" transform="translate(121.0 104.2) rotate(0.0)"/>
+    <path d="M0 0 C14.3 -9.8 14.3 -29.2 0 -39.0 C-14.3 -29.2 -14.3 -9.8 0 0 Z" fill="#7cb518" transform="translate(124.1 104.8) rotate(23.3)"/>
+    <path d="M0 0 C14.3 -9.8 14.3 -29.2 0 -39.0 C-14.3 -29.2 -14.3 -9.8 0 0 Z" fill="#388e3c" transform="translate(126.7 106.6) rotate(46.7)"/>
+    <path d="M0 0 C14.3 -9.8 14.3 -29.2 0 -39.0 C-14.3 -29.2 -14.3 -9.8 0 0 Z" fill="#2e7d32" transform="translate(128.3 109.3) rotate(70.0)"/>
+  </g>
+  <!-- alerta -->
+  <path d="M152 124 L176 166 L128 166 Z" fill="#e8472f" stroke="#e8472f" stroke-width="7" stroke-linejoin="round"/>
+  <path d="M152 140 L152 154" stroke="#fff" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="152" cy="161" r="3.2" fill="#fff"/>
+  <!-- ubicación -->
+  <path d="M120 232 C103 208 100 198 100 189 A20 20 0 1 1 140 189 C140 198 137 208 120 232 Z" fill="#143d1c"/>
+  <circle cx="120" cy="189" r="7.5" fill="#fff"/>
+</svg>

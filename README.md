@@ -1,4 +1,6 @@
-# Riesgo de árboles urbanos
+# Árboles en Riesgo
+
+*Monitorea · Reporta · Protege*
 
 Aplicación web (PWA) para calificar en campo el riesgo de caída de árboles urbanos, **en cualquier lugar**.
 Aplica la metodología del numeral 3.7 «Evaluación del riesgo en árboles urbanos» del Plan Maestro de Zonas
@@ -63,13 +65,18 @@ Al publicar una versión nueva, la app se actualiza sola la siguiente vez que se
 
 ## Uso
 
-| Pestaña | Qué hace |
+La barra inferior tiene **Inicio, Lista, Mapa y Resumen**, y en el centro el botón **+** para evaluar un árbol. Ajustes
+se abre con el engranaje de arriba.
+
+| Pantalla | Qué hace |
 |---|---|
-| **Evaluar** | Formulario por árbol. Barra de riesgo fija arriba, desglose y acción recomendada al final. |
+| **Inicio** | Logo, atajos (evaluar, mapa, guía, resumen) y cuántos árboles hay en cada categoría. |
+| **Evaluar** (botón +) | Formulario **por pasos**: 1 Datos, 2 Ubicación, 3 Riesgo, 4 Evidencia (inventario, fotos y resultado). La barra de riesgo queda fija arriba. Si falta un dato obligatorio al guardar, te lleva al primer paso con error. |
 | **Lista** | Evaluaciones guardadas, con filtros por categoría de riesgo, especie y categoría diamétrica. Ficha PDF y eliminar. |
 | **Mapa** | Puntos coloreados por categoría (mismos filtros). |
-| **Resumen** | Tablas 65 y 66, exportación (CSV, GeoJSON), importación desde CSV y sincronización opcional. |
-| **Ajustes** | Umbrales de las categorías de riesgo y catálogo editable de especies con sus factores Sp. |
+| **Resumen** | Tablas 65 y 66, inventario, exportación (CSV, GeoJSON), importación desde CSV y sincronización opcional. |
+| **Aprender y guía** | Cómo se calcula el riesgo, cómo medir en campo, señales de alerta, y alcance y límites. Los valores salen de las mismas constantes del cálculo. |
+| **Ajustes** | Método de vulnerabilidad, umbrales de las categorías y catálogo editable de especies con sus factores Sp. |
 
 No se puede guardar una evaluación si falta alguna variable obligatoria: el formulario marca los campos
 pendientes. Las variables de riesgo no traen valores por defecto, para que ninguna quede asumida sin querer.
@@ -206,6 +213,12 @@ Todo esto es opcional y **no entra en el cálculo del riesgo**:
 - **Ficha PDF:** suma solicitud, predio, categoría de amenaza, distancia, altitud, señales y una nota de **alcance**
   (inspección visual externa; no evalúa el sistema radicular interno ni el estado estructural de terrazas o muros donde
   esté plantado el individuo).
+
+## Marca y diseño
+
+El logo es [`public/logo.svg`](public/logo.svg) (árbol con alerta y ubicación). Los íconos instalables salen de él:
+`npm run iconos` genera `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` y `apple-touch-icon.png` en `public/`
+(ya vienen generados). La paleta y los componentes están en [`src/styles.css`](src/styles.css); hay tema claro y oscuro.
 
 ## Datos, exportación e importación
 

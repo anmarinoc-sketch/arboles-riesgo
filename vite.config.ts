@@ -9,20 +9,22 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: "autoUpdate",
-      includeAssets: ["icon.svg"],
+      includeAssets: ["icon.svg", "logo.svg", "icon-192.png", "icon-512.png", "icon-maskable-512.png", "apple-touch-icon.png"],
       manifest: {
-        name: "Riesgo de árboles urbanos",
-        short_name: "Riesgo árboles",
+        name: "Árboles en Riesgo",
+        short_name: "Árboles en Riesgo",
         description: "Calificación del riesgo de caída de árboles urbanos, en campo y sin conexión",
         lang: "es",
-        theme_color: "#1f6f43",
-        background_color: "#f6f7f4",
+        theme_color: "#2e7d32",
+        background_color: "#f1f6ed",
         display: "standalone",
         orientation: "portrait",
         start_url: ".",
         icons: [
+          { src: "icon-192.png", sizes: "192x192", type: "image/png", purpose: "any" },
+          { src: "icon-512.png", sizes: "512x512", type: "image/png", purpose: "any" },
+          { src: "icon-maskable-512.png", sizes: "512x512", type: "image/png", purpose: "maskable" },
           { src: "icon.svg", sizes: "any", type: "image/svg+xml", purpose: "any" },
-          { src: "icon.svg", sizes: "any", type: "image/svg+xml", purpose: "maskable" },
         ],
       },
       workbox: {
