@@ -5,6 +5,7 @@ import Logo, { LEMA_APP, NOMBRE_APP } from "../../components/Logo";
 import { IconoAjustes, IconoGrafica, IconoLibro, IconoMapa, IconoMas } from "../../components/Iconos";
 import { useEnLinea } from "../sync/useSync";
 import { useCategorias } from "../../lib/categorias";
+import { contarSinRespaldar, describirAntiguedad, useUltimoRespaldo } from "../../lib/ultimoRespaldo";
 
 export type Destino = "evaluar" | "mapa" | "aprender" | "resumen" | "ajustes" | "lista";
 
@@ -21,6 +22,8 @@ export default function InicioPage({ ir }: { ir: (d: Destino) => void }) {
   const enLinea = useEnLinea();
   const categorias = useCategorias();
   const evals = useLiveQuery(() => db.evaluaciones.toArray(), []) ?? [];
+  const ultimo = useUltimoRespaldo();
+  const sinRespaldar = contarSinRespaldar(evals, ultimo);
   const porCategoria = categorias.map(c => ({ c, n: evals.filter(e => e.categoriaId === c.id).length }));
 
   return (
@@ -58,6 +61,12 @@ export default function InicioPage({ ir }: { ir: (d: Destino) => void }) {
                 </li>
               ))}
             </ul>
+            {sinRespaldar > 0 && (
+              <p className="alerta">
+                {sinRespaldar} {sinRespaldar === 1 ? "evaluación sin respaldar" : "evaluaciones sin respaldar"} (última copia: {describirAntiguedad(ultimo)}).
+                {" "}<button type="button" className="enlace" onClick={() => ir("resumen")}>Hacer una copia</button>
+              </p>
+            )}
             <button type="button" className="secundario" onClick={() => ir("lista")}>Ver la lista</button>
           </>
         )}

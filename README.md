@@ -235,6 +235,25 @@ El logo es [`public/logo.svg`](public/logo.svg) (árbol con alerta y ubicación)
 `npm run iconos` genera `icon-192.png`, `icon-512.png`, `icon-maskable-512.png` y `apple-touch-icon.png` en `public/`
 (ya vienen generados). La paleta y los componentes están en [`src/styles.css`](src/styles.css); hay tema claro y oscuro.
 
+## Copia de seguridad y restauración
+
+En **Resumen → Copia de seguridad completa** se descarga un único archivo `.zip` con todas las evaluaciones, las **fotos**
+(en `fotos/`), el catálogo de especies y los ajustes (umbrales y método de vulnerabilidad). En los celulares que lo
+permiten también aparece «Compartir respaldo…» para enviarlo directo a WhatsApp, Drive o el correo. No incluye el token
+de sincronización.
+
+- **Cuándo:** al terminar cada jornada de campo. La app muestra cuántas evaluaciones están sin respaldar (en Inicio y
+  en Resumen) y cuándo fue la última copia; el CSV también cuenta como copia, aunque no lleva fotos.
+- **Restaurar:** «Elegir respaldo (.zip)» muestra qué trae y qué se agregaría antes de tocar nada. Las evaluaciones con
+  un código que ya existe **no se duplican**: se omiten, o se reemplazan si lo marcas. También se puede restaurar el
+  catálogo de especies y los ajustes. Sirve para recuperar datos o pasar todo a otro celular.
+- **Validación:** se rechazan archivos que no son un respaldo o son de una versión más nueva de la app, y se omiten con
+  aviso las evaluaciones incompletas o las fotos dañadas.
+- **Tamaño:** las fotos van sin comprimir de nuevo, así que el ZIP pesa lo que pesan las fotos guardadas.
+
+Lo que protege los datos fuera de la app: no borrar los datos del sitio en el navegador, no usar el modo incógnito y no
+cambiar de navegador a mitad del trabajo (cada navegador guarda lo suyo).
+
 ## Datos, exportación e importación
 
 - Todo se guarda en IndexedDB del navegador del dispositivo. **Borrar los datos del sitio borra las

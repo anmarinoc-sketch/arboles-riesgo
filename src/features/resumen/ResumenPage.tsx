@@ -9,6 +9,8 @@ import { leerCSV, type LecturaCSV } from "../../lib/importar";
 import { descargar, hoy } from "../../lib/descargar";
 import { fmt } from "../../lib/util";
 import SyncCard from "../sync/SyncCard";
+import RespaldoCard from "./RespaldoCard";
+import { marcarRespaldo } from "../../lib/ultimoRespaldo";
 
 export default function ResumenPage() {
   const evals = useLiveQuery(() => db.evaluaciones.toArray(), []) ?? [];
@@ -124,11 +126,13 @@ export default function ResumenPage() {
         </section>
       )}
 
+      <RespaldoCard />
+
       <section className="card">
         <h2>Exportar</h2>
         <p className="muted">{evals.length} evaluaciones. Coordenadas en WGS84 (EPSG:4326).</p>
         <button className="secundario" disabled={!evals.length}
-          onClick={() => descargar(evaluacionesACSV(evals), `evaluaciones-${hoy()}.csv`, "text/csv;charset=utf-8")}>Descargar CSV</button>
+          onClick={() => { descargar(evaluacionesACSV(evals), `evaluaciones-${hoy()}.csv`, "text/csv;charset=utf-8"); marcarRespaldo(); }}>Descargar CSV</button>
         <button className="secundario" disabled={!evals.length}
           onClick={() => descargar(JSON.stringify(evaluacionesAGeoJSON(evals), null, 2), `evaluaciones-${hoy()}.geojson`, "application/geo+json")}>Descargar GeoJSON</button>
         <p className="muted">La ficha PDF de cada árbol se descarga desde la pestaña Lista.</p>

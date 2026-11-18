@@ -48,6 +48,7 @@ export default function EvaluacionPage({ activa = true }: { activa?: boolean } =
   const [mensaje, setMensaje] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
   const [gps, setGps] = useState("");
   const [mapaAbierto, setMapaAbierto] = useState(false);
+  const [procesandoFotos, setProcesandoFotos] = useState(0); // fotos que aun se estan reduciendo
   const raiz = useRef<HTMLDivElement>(null);
   const [paso, setPaso] = useState(1);
 
@@ -102,12 +103,18 @@ export default function EvaluacionPage({ activa = true }: { activa?: boolean } =
 
   async function agregarFotos(files: FileList | null) {
     if (!files) return;
-    const nuevas: { blob: Blob; nombre: string; url: string }[] = [];
-    for (const f of Array.from(files)) {
-      const blob = await comprimirFoto(f);
-      nuevas.push({ blob, nombre: f.name || "foto.jpg", url: URL.createObjectURL(blob) });
+    const lista = Array.from(files); // se copia antes de que el input se vacie
+    setProcesandoFotos(n => n + 1);
+    try {
+      const nuevas: { blob: Blob; nombre: string; url: string }[] = [];
+      for (const f of lista) {
+        const blob = await comprimirFoto(f);
+        nuevas.push({ blob, nombre: f.name || "foto.jpg", url: URL.createObjectURL(blob) });
+      }
+      setFotos(a => [...a, ...nuevas]);
+    } finally {
+      setProcesandoFotos(n => n - 1);
     }
-    setFotos(a => [...a, ...nuevas]);
   }
 
   async function guardar() {
@@ -376,7 +383,9 @@ export default function EvaluacionPage({ activa = true }: { activa?: boolean } =
         {paso > 1 && <button type="button" className="atras" onClick={() => setPaso(paso - 1)}><IconoAtras size={20} /> Atrás</button>}
         {paso < PASOS.length
           ? <button type="button" className="grande continuar" onClick={() => setPaso(paso + 1)}>Continuar</button>
-          : <button type="button" className="grande continuar" onClick={guardar}>Guardar evaluación</button>}
+          : <button type="button" className="grande continuar" onClick={guardar} disabled={procesandoFotos > 0}>
+              {procesandoFotos > 0 ? "Procesando fotos…" : "Guardar evaluación"}
+            </button>}
       </div>
     </div>
   );
